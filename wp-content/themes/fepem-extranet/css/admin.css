@@ -1,0 +1,42 @@
+/**
+    CSS pour le BO
+*/
+
+.erase {
+    cursor: pointer;
+}
+.error-field-required {
+    color: #e20000;
+}
+.hidden-element {
+    display:none;
+}
+
+/* forms */
+input[readonly].ecpdate {
+    background-color: white;
+}
+
+/* CPT ecp_event : data */
+.ecp-event-data ul li { 
+    height: 20px; 
+    clear:both; 
+    margin: 0 0 15px 0;
+}
+.ecp-event-data ul li label { 
+    width: 100px; 
+    display:block; 
+    float:left; 
+    padding-top:4px; 
+}
+.ecp-event-data ul li input { 
+    width:125px; 
+    display:block; 
+    float:left; 
+}
+.ecp-event-data ul li em { 
+    width: 200px; display:block; 
+    float:left; color:gray; 
+    margin-left:10px; 
+    padding-top: 4px;
+}

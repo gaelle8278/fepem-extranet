@@ -1,0 +1,106 @@
+# Translation of Plugins - WordPress Beta Tester - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - WordPress Beta Tester - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2017-05-28 09:30:03+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/2.4.0-alpha\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - WordPress Beta Tester - Stable (latest release)\n"
+
+#: wp-beta-tester.php:200
+msgid "Saved."
+msgstr "Enregistré."
+
+#. Author URI of the plugin/theme
+msgid "http://blog.ftwr.co.uk/"
+msgstr "http://blog.ftwr.co.uk/"
+
+#. Author of the plugin/theme
+msgid "Peter Westwood"
+msgstr "Peter Westwood"
+
+#. Description of the plugin/theme
+msgid "Allows you to easily upgrade to Beta releases."
+msgstr "Vous permet de mettre à jour facilement en version Bêta"
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/wordpress-beta-tester/"
+msgstr "https://wordpress.org/plugins/wordpress-beta-tester/"
+
+#. Plugin Name of the plugin/theme
+msgid "WordPress Beta Tester"
+msgstr "WordPress Bêta Tester"
+
+#: wp-beta-tester.php:249
+msgid "Why don't you <a href=\"%s\">head on over and upgrade now</a>."
+msgstr "Pourquoi ne <a href=\"%s\">plongez-vous pas et mettez à niveau maintenant</a> ?"
+
+#: wp-beta-tester.php:247
+msgid "Save Changes"
+msgstr "Enregistrer les modifications"
+
+#: wp-beta-tester.php:242
+msgid "This is the bleeding edge development code which may be unstable at times. <em>Only use this if you really know what you are doing</em>."
+msgstr "Cette version utilise le code de développement (Bleeding edge nightlies) qui peut parfois être instable. <em>Ne l’utilisez que si vous savez vraiment ce que vous faites</em>."
+
+#: wp-beta-tester.php:240
+msgid "Bleeding edge nightlies"
+msgstr "Version en cours de développement (Bleeding edge nightlies)"
+
+#: wp-beta-tester.php:234
+msgid "This contains the work that is occurring on a branch in preparation for a x.x.x point release.  This should also be fairly stable but will be available before the branch is ready for beta."
+msgstr "Cette version contient les modifications sur une branche en cours de préparation pour une sortie mineur x.x.x. Elle devrait également être assez stable, mais elle ne sera pas disponible avant que la branche soit prête pour la bêta."
+
+#: wp-beta-tester.php:232
+msgid "Point release nightlies"
+msgstr "Version nocturne (point release nightly)"
+
+#: wp-beta-tester.php:225
+msgid "Please select the update stream you would like this blog to use:"
+msgstr "Veuillez sélectionner le flux de mise à jour que vous voulez que ce site utilise&nbsp;:"
+
+#: wp-beta-tester.php:220
+msgid "By default, your WordPress install uses the stable update stream. To return to this, please deactivate this plugin."
+msgstr "Par défaut, votre installation de WordPress utilise le flux de mise à jour stable. Pour revenir à cela, veuillez désactiver cette extension."
+
+#: wp-beta-tester.php:217
+msgid "Thank you for helping by testing WordPress. Please <a href=\"%s\">report any bugs you find</a>."
+msgstr "Merci de nous aider en testant WordPress. Veuillez <a href=\"%s\">rapporter toute erreur trouvée</a>."
+
+#: wp-beta-tester.php:216
+msgctxt "Url to beta support forum"
+msgid "https://wordpress.org/support/forum/alphabeta"
+msgstr "https://wordpress.org/support/forum/alphabeta"
+
+#: wp-beta-tester.php:214
+msgctxt "Url to database backup instructions"
+msgid "https://codex.wordpress.org/Backing_Up_Your_Database"
+msgstr "https://codex.wordpress.org/Backing_Up_Your_Database"
+
+#: wp-beta-tester.php:213
+msgid "By their nature, these releases are unstable and should not be used anyplace where your data is important. So please <a href=\"%1$s\">back up your database</a> before upgrading to a test release. In order to hear about the latest beta releases, your best bet is to watch the <a href=\"%2$s\">development blog</a> and the <a href=\"%3$s\">beta forum</a>."
+msgstr "De par leur nature, ces versions ne sont pas stables et ne doivent pas être utilisées en conjonction avec des données importantes. Donc, veuillez <a href=\"%1$s\">sauvegarder votre base de données</a> avant de mettre à jour vers une version de test. Afin d’en savoir plus sur les dernières versions bêta, le mieux est de consulter le <a href=\"%2$s\">blog de développement</a> et le <a href=\"%3$s\">forum</a>."
+
+#: wp-beta-tester.php:208
+msgid "<strong>Please note:</strong> There are no development builds of the beta stream you have choosen available, so you will receive normal update notifications."
+msgstr "<strong> Note :</strong> Il n’y a pas de flux développements bêta pour ce que vous avez choisi de disponible, donc vous recevrez les notifications normales."
+
+#: wp-beta-tester.php:204
+msgid "<strong>Please note:</strong> Once you have switched your blog to one of these beta versions of software, it will not always be possible to downgrade, as the database structure may be updated during the development of a major release."
+msgstr "<strong>Note&nbsp;:&nbsp;</strong>Une fois que vous avec basculé votre blog vers une de ces versions bêta, il ne sera pas toujours possible de revenir en arrière, comme la structure de la base de données peut avoir été mise à jour durant le développement de la version majeure."
+
+#: wp-beta-tester.php:98
+msgid "Beta Testing"
+msgstr "Test bêta"
+
+#: wp-beta-tester.php:97 wp-beta-tester.php:195
+msgid "Beta Testing WordPress"
+msgstr "Test bêta de WordPress"
+
+#: wp-beta-tester.php:76
+msgid "<strong>Error:</strong> Your current <a href=\"%1$s\">WordPress Beta Tester plugin configuration</a> will downgrade your install to a previous version - please reconfigure it."
+msgstr "<strong>Erreur&nbsp;:&nbsp;</strong>Votre configuration actuelle de <a href=\"%1$s\">WordPress Beta Tester</a> va vous faire revenir à une version précédente - merci de la reconfigurer."

@@ -1,0 +1,59 @@
+/*--------------------------------------------------------------
+# Layout
+--------------------------------------------------------------*/
+* {
+  box-sizing: border-box;
+}
+#site-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+}
+.site-content {
+  width: 95%;
+  height: 100%;
+  margin: 0 auto;
+}
+.fullwidth,
+section.fullwidth {
+  width: 100%;
+}
+header {
+  height: 80px;
+}
+main {
+  min-height: calc(100% - 80px - 20px);
+}
+footer {
+  height: 20px;
+}
+/** Header */
+/***********/
+.site-branding,
+.member-header {
+  display: inline-block;
+  vertical-align: top;
+}
+.site-branding {
+  width: 30%;
+}
+.member-header {
+  width: 70%;
+  text-align: right;
+}
+/** Content **/
+/*************/
+section,
+aside {
+  display: inline-block;
+  vertical-align: top;
+}
+section {
+  height: 100%;
+  width: calc(70% - 15px);
+  margin-right: 15px;
+}
+aside {
+  width: 30%;
+}

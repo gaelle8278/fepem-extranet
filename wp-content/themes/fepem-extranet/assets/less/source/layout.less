@@ -1,0 +1,64 @@
+/*--------------------------------------------------------------
+# Layout
+--------------------------------------------------------------*/
+
+@import '../constants';
+
+* {
+    box-sizing: border-box;
+}
+#site-container {
+    position: relative;
+    width: @width-container;
+    height: 100%;
+    margin: 0 auto;
+}
+.site-content {
+    width: @width-content;
+    height: 100%;
+    margin: 0 auto;
+}
+.fullwidth,
+section.fullwidth {
+    width: 100%;
+}
+header {
+    height: @header-height;
+}
+main {
+    min-height: ~"calc(100% - @{header-height} - @{footer-height})";
+}
+footer {
+    height: @footer-height;
+}
+
+/** Header */
+/***********/
+.site-branding, .member-header {
+    display: inline-block;
+    vertical-align: top;
+}
+.site-branding {
+    width: @width-site-branding;
+}
+.member-header {
+    width: @width-member-header;
+    text-align: right;
+}
+
+/** Content **/
+/*************/
+section, aside {
+    display: inline-block;
+    vertical-align: top;
+}
+section {
+    height: 100%;
+    width: ~"calc(@{width-section} - @{gutter-content})";
+    margin-right: @gutter-content;
+}
+aside {
+    width: @width-aside;
+}
+
+

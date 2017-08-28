@@ -1,0 +1,23 @@
+
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# limit type file upload
+RewriteBase /
+
+RewriteCond %{REQUEST_URI} ^wp-content/ged [NC]
+RewriteCond %{REQUEST_URI} !\.(jpe?g|png|gif|bmp|doc|docx|xls|xlsx|ppt|pptx|pdf|csv|odt|odp|ods)$ [NC]
+RewriteRule .* - [F,L]
+
+RewriteCond %{REQUEST_FILENAME} -s
+RewriteRule ^wp-content/ged/(.*)/(.*)$ dl-file.php?subdir=$1&file=$2 [QSA,L]
+
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress

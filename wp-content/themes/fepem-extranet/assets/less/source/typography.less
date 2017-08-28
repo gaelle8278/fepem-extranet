@@ -1,0 +1,62 @@
+/*--------------------------------------------------------------
+# Typography
+--------------------------------------------------------------*/
+
+@import '../constants';
+
+html {
+    height: 100%;
+    font-family: Verdana, sans-serif;
+    font-size: 1em; /* 16px for most browsers */
+}
+body {
+    height: 100%;
+    font-size: 1em;
+    line-height: 1.5;
+    background-color: @body-color;
+}
+
+header {
+    background-color: @header-color;
+}
+section, .sidebar_widget {
+    background-color: @content-bg-color;
+}
+a {
+    color: @link-color;
+    text-decoration: none;
+}
+.header-highlight {
+    background-color: @list-header-bgcolor;
+}
+
+
+.section-header {
+    margin: 5px 0;
+    padding: 5px;font-size: 1em;
+}
+main .section-header a {
+    font-size: 1em;
+    color: @dark-text-color;
+}
+.item-composant {
+    font-size: 0.75em;
+    padding: 2px 0;
+    border-bottom: 1px solid @brd-division-color;
+}
+.item-composant .tag-event {
+    color: @tag-light-color;
+    background-color: @tag-event-bgcolor;
+}
+.item-composant .tag-comment {
+    color: @tag-dark-color;
+    background-color: @tag-comment-bgcolor;
+}
+.item-composant .tag-message {
+    color: @tag-light-color;
+    background-color: @tag-message-bgcolor;
+}
+.item-composant .tag-doc {
+    color: @tag-light-color;
+    background-color: @tag-doc-bgcolor;
+}
