@@ -10,10 +10,9 @@ function get_member_connected() {
             $member = wp_get_current_user();
         }
     }
-
     return $member;
-
 }
+
 /**
  * Fonction qui redirige l'utilisateur selon son état de connexion et son role
  */

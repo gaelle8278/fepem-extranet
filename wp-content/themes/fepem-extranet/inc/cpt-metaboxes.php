@@ -20,11 +20,11 @@
  *  - catégorie d'événement
  * 
  **************************************************/
-function extranetcp_cpt() {
+function extranetcp_cpt_ct() {
 
-    //taxonomie category pour les àƒÂ©vàƒÂ©nements
+    //taxonomie category pour les événements
     register_taxonomy(
-        'ecp_eventcategory',
+        'ecp_tax_event_category',
         'ecp_events',
         array(
             'label' => 'Catégorie',
@@ -36,8 +36,8 @@ function extranetcp_cpt() {
                 'all_items' => "Toutes les catégories d'évéments",
                 'parent_item' => null,
                 'parent_item_colon' => null,
-                'edit_item' => "Editer la catétgorie d'événements",
-                'update_item' =>  "Mettre à  jour la catégorie d'événement",
+                'edit_item' => "Editer la catégorie d'événements",
+                'update_item' =>  "Mettre à jour la catégorie d'événement",
                 'add_new_item' => "Ajouter une catégorie d'événement",
                 'new_item_name' =>  "Nouvelle catégorie d'événements",
                 'separate_items_with_commas' => "Séparer les catégories d'évéments par des virgules",
@@ -46,7 +46,34 @@ function extranetcp_cpt() {
             ),
             'hierarchical' => true,
             'show_ui' => true,
-            'query_var' => true,
+            'public' => true,
+        )
+    );
+
+    //taxonomie type de public pour les instances, les messageries, les GED
+    register_taxonomy(
+        'ecp_tax_type_participant',
+        array('commission','ecp_messagerie','ecp_ged'),
+        array(
+            'label' => 'Type de participant',
+            'labels' => array(
+                'name' => "Types de participant",
+                'singular_name' => "Type de participant",
+                'search_items' =>  "Rechercher parmi les types de participant",
+                'popular_items' => "Types de participant les plus utilisées",
+                'all_items' => "Tous les types de participant",
+                'parent_item' => null,
+                'parent_item_colon' => null,
+                'edit_item' => "Editer le type de participant",
+                'update_item' =>  "Mettre à jour le type de participant",
+                'add_new_item' => "Ajouter un type de participant",
+                'new_item_name' =>  "Nouveau type de participant",
+                'separate_items_with_commas' => "Séparer les types de participant par des virgules",
+                'add_or_remove_items' => "Ajouter ou supprimer un type de participant",
+                'choose_from_most_used' =>  "Choisir parmi les types de participant les plus utilisées",
+            ),
+            'hierarchical' => true,
+            'show_ui' => true,
             'public' => true,
         )
     );
@@ -70,16 +97,29 @@ function extranetcp_cpt() {
                 'not_found_in_trash'=> 'Pas de commission dans la corbeille'
             ),
             'public' => true,
-            'capability_type' => 'post',
+            'capability_type' => 'commission',
+            'capabilities' => array(
+				'publish_posts' => 'publish_commissions',
+				'edit_posts' => 'edit_commissions',
+				'edit_others_posts' => 'edit_others_commissions',
+				'delete_posts' => 'delete_commissions',
+				'delete_others_posts' => 'delete_others_commissions',
+				'read_private_posts' => 'read_private_commissions',
+				'edit_post' => 'edit_commission',
+				'delete_post' => 'delete_commission',
+				'read_post' => 'read_commission',
+			),
             'supports' => array(
                 'title',
                 'editor',
                 'author'
             ),
-            'has_archive' => true,
+            'has_archive' => true
             //'menu_icon' => get_template_directory_uri() . "/images/balloon--pencil.png" --> trouver la bonne image
         )
     );
+
+    
 
     //calendriers
     register_post_type(
@@ -128,7 +168,7 @@ function extranetcp_cpt() {
             'public' => true,
             'capability_type' => 'post',
             'supports'=> array('title', 'author', 'editor' ),
-            'taxonomies' => array( 'ecp_eventcategory')
+            'taxonomies' => array( 'ecp_tax_event_category')
             //'show_in_menu' => 'edit.php?post_type=ecp_calendrier'
         )
     );
@@ -236,8 +276,11 @@ function extranetcp_cpt() {
             'supports'=> array('title', 'excerpt', 'author')
         )
     );
+
+
+    
 }
-add_action('init', 'extranetcp_cpt');
+add_action('init', 'extranetcp_cpt_ct');
 
 /****************
  * Admin Menus
@@ -914,7 +957,7 @@ function ecp_event_custom_columns( $column, $post_id ) {
     {
         case "ecp_col_ev_cat":
             // - show taxonomy terms -
-            $eventcats = get_the_terms($post->ID, "ecp_eventcategory");
+            $eventcats = get_the_terms($post->ID, "ecp_tax_event_category");
             $eventcats_html = array();
             if ($eventcats) {
                 foreach ($eventcats as $eventcat) {
@@ -1057,6 +1100,7 @@ function save_metabox_event_data( $post_id ) {
     if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
         return $post_id;
     }
+    
 
     // check user permission
     if ( !current_user_can( 'edit_post', $post_id )) {

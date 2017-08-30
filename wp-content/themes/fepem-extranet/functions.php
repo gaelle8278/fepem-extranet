@@ -231,6 +231,10 @@ add_action( 'wp_ajax_update_members_notification', 'get_members_of_instance_byaj
  * Custom post type et metabox
  */
 require get_template_directory() . '/inc/cpt-metaboxes.php';
+/**
+ * Custom post type custom capabilities
+ */
+require get_template_directory() . '/inc/cpt-capabilities.php';
 
 /**
  * Custom tables

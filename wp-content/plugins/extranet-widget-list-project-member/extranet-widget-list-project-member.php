@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Extranet Widget List Project Members
- * Description: Widget permettant d'afficher des événements de l'agenda
+ * Description: Widget permettant d'afficher La liste des membres du projet
  * Version: 1.0
  * Auhtor: Gaëlle Rauffet
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Membre Extranet
+ * Plugin Name:       Extranet Member
  * Description:       Plugin pour gérer les membres de l'Extranet
  * Version:           1.0.0
  * Author:            Gaëlle Rauffet
@@ -27,7 +27,16 @@ class Extranet_Member_Plugin {
         add_action( 'edit_user_profile_update', array( $this, 'save_additional_user_meta' ));
         add_action( 'user_register', array( $this, 'save_additional_user_meta' ) );
 
-
+        /* Ajout d'une custom taxonomy aux utilisateurs */
+        add_action( 'init', array($this, 'add_user_taxonomy'));
+        /* Ajout de la page gérant la custom user taxonomy dans le BO. */
+        add_action( 'admin_menu', array( $this, 'add_type_de_membre_admin_page' ) );
+        /* gestion du placement de la page d'administration de la user taxomnomy dans le menu */
+        add_filter( 'parent_file', array( $this, 'fix_user_tax_page' ) );
+        /* Ajout d'une colonne "Utilisateurs" sur la page admin de la custom user taxonomy. */
+        add_filter( 'manage_edit-ecp_tax_type_membre_columns', array( $this, 'manage_type_membre_user_column' ) );
+        /* Contenu de la colonne "Utilisateurs" sur la page admin de la custom user taxonomy. */
+        add_action( 'manage_ecp_tax_type_membre_custom_column', array( $this, 'display_type_membre_user_column'), 10, 3 );
     }
 
     /**
@@ -55,6 +64,62 @@ class Extranet_Member_Plugin {
      */
     public function remove_member_role() {
         remove_role( 'member-extranet' );
+    }
+
+    /**
+     * Fonction qui crée les roles nécessaires à la gestion en BO
+     *
+     * Appelée à l'activation du plugin
+     */
+    public function create_bo_roles() {
+        $add_supplier = add_role( 'admin-fepem-exec', 'Administrateur Fepem Exécutif',
+            array(
+                'read' => true,
+                'edit_pages' => true,
+                'create_posts' => true,
+                'manage_categories' => false,
+                'edit_commissions' => true,
+                'edit_others_commissions' => true,
+                'delete_commissions' => true,
+                'delete_others_commissions' => true,
+                'read_private_commissions' => true,
+                'publish_commissions' => true
+            ));
+    }
+
+    /**
+     * Fonction qui enlève les roles BO
+     *
+     * Appelée à la désactivation du plugin
+     */
+    public function remove_bo_roles() {
+        remove_role( 'admin-fepem-exec' );
+    }
+
+    /**
+     * Fonction qui gère l'ajout des capacités liées aux CPT au role Administrateur
+     */
+    public function add_admin_cap() {
+        $role = get_role( 'administrator' );
+        $role->add_cap( 'read_private_commissions' );
+        $role->add_cap( 'publish_commissions' );
+        $role->add_cap( 'edit_commissions' );
+        $role->add_cap( 'edit_others_commissions' );
+        $role->add_cap( 'delete_commissions' );
+        $role->add_cap( 'delete_others_commissions' );
+    }
+
+    /**
+     * Fonction qui gère la suppression des capacités liées aux CPT au role Administrateur
+     */
+    public function remove_admin_cap() {
+        $role = get_role( 'administrator' );
+        $role->remove_cap( 'read_private_commissions' );
+        $role->remove_cap( 'publish_commissions' );
+        $role->remove_cap( 'edit_commissions' );
+        $role->remove_cap( 'edit_others_commissions' );
+        $role->remove_cap( 'delete_commissions' );
+        $role->remove_cap( 'delete_others_commissions' );
     }
 
     /**
@@ -101,6 +166,8 @@ class Extranet_Member_Plugin {
      * Fonction pour ajouter des champs au profil utilisateur
      */
     public function additional_user_fields( $user ) {
+
+        $tax = get_taxonomy( 'ecp_tax_type_membre' );
 
         if(is_object($user)) {
             $picture= esc_url( get_user_meta( $user->ID, 'user_meta_image', true ) );
@@ -159,7 +226,45 @@ class Extranet_Member_Plugin {
                </td>
             </tr>
 
-        </table><!-- end form-table -->
+        </table>
+        <?php
+
+        /* Make sure the user can assign terms of the profession taxonomy before proceeding. */
+	if ( !current_user_can( $tax->cap->assign_terms ) )
+		return;
+
+        /* Get the terms of the 'profession' taxonomy. */
+	$terms = get_terms( 'ecp_tax_type_membre', array( 'hide_empty' => false ) );
+
+        ?>
+        <h3>Type de membre</h3>
+
+	<table class="form-table">
+            <tr>
+                <th><label for="profession">Choisir le type de membre</label></th>
+                <td><?php
+                    /* If there are any profession terms, loop through them and display checkboxes. */
+                    if ( !empty( $terms ) ) {
+			foreach ( $terms as $term ) {
+                            ?>
+                            <input type="radio" name="type-membre" id="type-membre-<?php echo esc_attr( $term->slug ); ?>"
+                                   value="<?php echo esc_attr( $term->slug ); ?>"
+                                       <?php
+                                       if( is_object($user) ) {
+                                        checked( true, is_object_in_term( $user->ID, 'ecp_tax_type_membre', $term ) );
+                                       }
+                                       ?> />
+                            <label for="type-memebre-<?php echo esc_attr( $term->slug ); ?>"><?php echo $term->name; ?></label> <br />
+                            <?php
+
+                            }
+                    } else {
+			echo "Il n'y pas de type de membre disponible";
+                    }
+                    ?>
+                </td>
+            </tr>
+	</table>
         <?php
     }
 
@@ -167,25 +272,171 @@ class Extranet_Member_Plugin {
     * Saves additional user fields to the database
     */
     function save_additional_user_meta( $user_id ) {
-        // only saves if the current user can edit user profiles
-        if ( !current_user_can( 'edit_user', $user_id ) )
-            return false;
+        $tax = get_taxonomy( 'profession' );
 
-        update_user_meta( $user_id, 'user_meta_image', $_POST['user_meta_image'] );
+        /* Make sure the current user can edit the user and assign terms before proceeding. */
+	if ( !current_user_can( 'edit_user', $user_id ) && current_user_can( $tax->cap->assign_terms ) )
+		return false;
+
+        update_user_meta( $user_id, 'user_meta_image', esc_attr($_POST['user_meta_image']) );
 
         if(isset($_POST['user_meta_region'])) {
-            update_user_meta($user_id, 'user_meta_region', $_POST['user_meta_region']);
+            update_user_meta($user_id, 'user_meta_region', esc_attr($_POST['user_meta_region']) );
         }
 
         if(isset($_POST['user_meta_tel'])) {
-            update_user_meta($user_id, 'user_meta_tel', $_POST['user_meta_tel']);
+            update_user_meta($user_id, 'user_meta_tel', esc_attr($_POST['user_meta_tel']) ) ;
         }
+
+        if(isset($_POST['type-membre'])) {
+            $term = esc_attr( $_POST['type-membre'] );
+            
+            /* Sets the terms (we're just using a single term) for the user. */
+            wp_set_object_terms( $user_id, array( $term ), 'ecp_tax_type_membre', false);
+
+            clean_object_term_cache( $user_id, 'ecp_tax_type_membre' );
+        }
+
+
+
     }
+
+    /**
+    * Ajout de la custom taxonomy aux objets Utilisateurs
+    */
+    public function add_user_taxonomy() {
+	register_taxonomy(
+            'ecp_tax_type_membre',
+       	    'user',
+	    array(
+                'public' => true,
+                'labels' => array(
+				'name' => "Types de membre",
+				'singular_name' => "Type de membre",
+				'menu_name' => "Types de membre",
+				'search_items' => "Rechercher parmi les types de membre",
+				'popular_items' => "Les types de membre les plus utilisés",
+				'all_items' => "Tous les types de membre",
+				'edit_item' => "Editer le type de membre",
+				'update_item' => "Mettre à jour le type de membre",
+				'add_new_item' => "Ajouter un type de membre",
+				'new_item_name' => "Nouveau type de membre",
+				'separate_items_with_commas' => "Séparer les types de membre par des virgules",
+				'add_or_remove_items' => "Ajouter ou supprimer un type de membre",
+				'choose_from_most_used' => "Choisir parmi les types de membre les plus utilisés",
+                ),
+		'rewrite' => array(
+				'with_front' => true,
+				'slug' => 'type-de-membre'
+		),
+		'capabilities' => array(
+				'manage_terms' => 'edit_users', // Using 'edit_users' cap to keep this simple.
+				'edit_terms'   => 'edit_users',
+				'delete_terms' => 'edit_users',
+				'assign_terms' => 'read',
+		),
+		'update_count_callback' => 'update_type_de_membre_count' // Use a custom function to update the count.
+            )
+	);
+    }
+
+
+    /**
+    * Creates the admin page for the '' taxonomy under the 'Users' menu.
+    * It works the same as any other taxonomy page in the admin.  However, this is kind of hacky and is meant as a quick solution.
+    * When clicking on the menu item in the admin, WordPress' menu system thinks you're viewing something under 'Posts'
+    * instead of 'Users' => see fix_user_tax_page on hoo parent_file
+    */
+    public function add_type_de_membre_admin_page() {
+
+        $tax = get_taxonomy( 'ecp_tax_type_membre' );
+
+        add_users_page(
+                   esc_attr( $tax->labels->menu_name ),
+                   esc_attr( $tax->labels->menu_name ),
+                   $tax->cap->manage_terms,
+                   'edit-tags.php?taxonomy=' . $tax->name
+        );
+    }
+
+    /**
+     * To set user taxonomy page admin under Users menu
+     * 
+     * @global type $pagenow
+     * @param string $parent_file
+     * @return string
+     */
+    public function fix_user_tax_page( $parent_file = '' ) {
+	global $pagenow;
+
+	if ( ! empty( $_GET[ 'taxonomy' ] ) && $_GET[ 'taxonomy' ] == 'ecp_tax_type_membre' && $pagenow == 'edit-tags.php' ) {
+            $parent_file = 'users.php';
+	}
+
+	return $parent_file;
+    }
+
+    /**
+    * Unsets the 'posts' column and adds a 'users' column on the manage profession admin page.
+    *
+    * @param array $columns An array of columns to be shown in the manage terms table.
+    */
+    public function manage_type_membre_user_column($columns) {
+        unset( $columns['posts'] );
+
+	$columns['users'] = "Nombre d'utilisateurs";
+
+	return $columns;
+    }
+
+    /**
+    * Displays content for custom columns on the manage ecp_tax_type_membre taxonomy page in the admin.
+    *
+    * @param string $display WP just passes an empty string here.
+    * @param string $column The name of the custom column.
+    * @param int $term_id The ID of the term being displayed in the table.
+    */
+    public function display_type_membre_user_column( $display, $column, $term_id ) {
+        if ( 'users' === $column ) {
+            $term = get_term( $term_id, 'ecp_tax_type_membre' );
+            echo $term->count;
+	}
+    }
+    
 
 }
 
 new Extranet_Member_Plugin();
-//gestion du role à l'activation/désactivation du plugin
+
+/**
+* Function for updating the 'type-de-membre' taxonomy count.  What this does is update the count of a specific term
+* by the number of users that have been given the term.  We're not doing any checks for users specifically here.
+* We're just updating the count with no specifics for simplicity.
+
+* See the _update_post_term_count() function in WordPress for more info.
+*
+* @param array $terms List of Term taxonomy IDs
+* @param object $taxonomy Current taxonomy object of terms
+*/
+function update_type_de_membre_count( $terms, $taxonomy ) {
+    global $wpdb;
+
+    foreach ( (array) $terms as $term ) {
+
+	$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $term ) );
+
+	do_action( 'edit_term_taxonomy', $term, $taxonomy );
+	$wpdb->update( $wpdb->term_taxonomy, compact( 'count' ), array( 'term_taxonomy_id' => $term ) );
+	do_action( 'edited_term_taxonomy', $term, $taxonomy );
+    }
+}
+
+//gestion des données l'activation/désactivation du plugin
 register_activation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'create_member_role' ) );
+register_activation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'create_bo_roles' ) );
+register_activation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'add_admin_cap' ) );
 register_deactivation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'remove_member_role' ) );
+register_deactivation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'remove_bo_roles' ) );
+register_deactivation_hook( __FILE__, array( 'Extranet_Member_Plugin', 'remove_admin_cap' ) );
+
 
