@@ -17,13 +17,8 @@ $id_instance = intval($_POST['instance_id']);
 $id_calendrier= get_post_meta($id_instance, '_meta_calendar_commission',true);
 
 $calendar_events=[];
-$events = get_posts(
-            array(
-                'post_type' => 'ecp_event',
-                'post_parent' => $id_calendrier,
-                'posts_per_page'   => -1,
-            )
-        );
+$events=getevents_of_calendar($id_calendrier);
+
 if(!empty($events)) {
    foreach($events as $event) {
         $tab_event=[];

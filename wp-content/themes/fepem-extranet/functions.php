@@ -166,6 +166,7 @@ function extranetcp_add_rewrite_calendar_pages() {
   global $wp_rewrite;
   add_rewrite_tag('%vue%','([^&]+)');
   $wp_rewrite->add_rule('ecp_calendrier/([^/]+)/([^/]+)','index.php?ecp_calendrier=$matches[1]&vue=$matches[2]','top');
+  $wp_rewrite->add_rule('ecp_fcalendrier/([^/]+)/([^/]+)','index.php?ecp_fcalendrier=$matches[1]&vue=$matches[2]','top');
 
   $wp_rewrite->flush_rules();
 }
@@ -226,13 +227,211 @@ function get_members_of_instance_byajaxcall() {
 }
 add_action( 'wp_ajax_update_members_notification', 'get_members_of_instance_byajaxcall' );
 
+/**
+ * Create custom filter for list admin comments
+ */
+function extranetecp_add_filer_comments() {
+
+    // we are only getting the none-default post types here (no post, no page, no attachment)
+    // you can also change this, just take a look at the get_post_types() function
+    /*$args = array(
+        'public'   => true,
+        '_builtin' => false
+    );*/
+    //$post_types = get_post_types( $args, 'objects' ); // we get the post types as objects
+    $post_types=[
+        [
+            'label'=>"Messages",
+            'slug'=>"ecp_message"
+        ],
+        [
+            'label'=>"Messages Fepem",
+            'slug'=>"ecp_fmessage"
+        ],
+
+    ];
+
+    if ($post_types) { // only start if there are custom post types
+
+        // make sure the name of the select field is called "post_types"
+        echo '<select name="post_type" id="filter-by-post-type">';
+
+        // I also add an empty option to reset the filtering and show all comments of all post-types
+        echo '<option value="">Tous les commentaires</option>';
+
+        // for each post-type that is found, we will create a new <option>
+        foreach ($post_types as $post_type) {
+
+            $label = $post_type['label']; // get the label of the post-type
+            $name = $post_type['slug']; // get the name(slug) of the post-type
+
+            // value of the optionsfield is the name(slug) of the post-type
+            echo '<option value="'.$name.'">'.$label.'</option>';
+
+        }
+        echo '</select>';
+    }
+
+}
+
+if( in_array('administrator', get_current_user_roles()) ) {
+    add_action( 'restrict_manage_comments', 'extranetecp_add_filer_comments' );
+}
+
+/**
+ * Filtre les commentaires affichés dans la liste admin des commentaires
+ * selon role utilisateur et type du post auquel est lié le commentaire
+ */
+function extranetecp_comment_list_by_role($clauses) {
+    global $pagenow;
+    
+    if ('edit-comments.php' == $pagenow && current_user_can('manage_instances')) {
+        $user_roles=get_current_user_roles();
+
+        if( in_array('admin-fepem',$user_roles) ) {
+            $post_type="ecp_fmessage";
+        } elseif ( in_array('admin-fepem-exec',$user_roles) ) {
+            $post_type="ecp_message";
+        }
+        if( isset( $post_type ) ) {
+            $clauses['join'] = ", wp_posts";
+            $clauses['where'] .= " AND wp_posts.post_type = '".$post_type."' AND wp_comments.comment_post_ID = wp_posts.ID";
+        }
+        
+    }
+        
+    return $clauses;
+}
+add_filter('comments_clauses', 'extranetecp_comment_list_by_role');
+
+/**
+ * Mets à jour les stats dans le menu de la liste des commentaires en admin
+ * La liste des commentaires étant filtrée selon role de l'utilisateur et le type de post
+ */
+function extranetecp_upate_list_comments_count( ) {
+    global $pagenow;
+
+    $stats_object=null;
+    
+    if ('edit-comments.php' == $pagenow && current_user_can('manage_instances') ) {
+        //mise à jour si user à un role custom
+        $user_roles=get_current_user_roles();
+        if( in_array('admin-fepem',$user_roles) ) {
+            $post_type="ecp_fmessage";
+        } elseif ( in_array('admin-fepem-exec',$user_roles) ) {
+            $post_type="ecp_message";
+        }
+
+        if( isset( $post_type )) {
+            $count = wp_cache_get( "comments-{$post_type}", 'counts' );
+            if ( false !== $count ) {
+                return $count;
+            }
+
+            $stats = array('moderated'=>0,'approved'=>0,'post-trashed'=>0,'trash'=>0,'total_comments'=>0,'spam'=>0, 'all'=>0);
+            $the_query = new WP_Query( array('post_type' => $post_type,'posts_per_page' => -1) );
+            if ( $the_query->have_posts() ) :
+                while ( $the_query->have_posts() ) : $the_query->the_post();
+                    $comments = get_comment_count(get_the_id());
+                    $stats['moderated'] = $stats['moderated'] + $comments['awaiting_moderation'];
+                    $stats['approved'] = $stats['approved'] + $comments['approved'];
+                    $stats['post-trashed'] = $stats['post-trashed'] + $comments['post-trashed'];
+                    $stats['trash'] = $stats['trash'] + $comments['trash'];
+                    $stats['total_comments'] = $stats['total_comments'] + $comments['total_comments'];
+                    $stats['spam'] = $stats['spam'] + $comments['spam'];
+                    $stats['all'] = $stats['all'] + $comments['all'];
+                    
+
+		endwhile;
+            endif;
+            wp_reset_postdata();
+
+
+            $stats_object = (object) $stats;
+            wp_cache_set( "comments-{$post_type}", $stats_object, 'counts' );
+        }
+    }
+    return $stats_object;
+
+}
+add_filter('wp_count_comments','extranetecp_upate_list_comments_count');
+
+/**
+ * Enlève aux administrateurs d'intances les entrées de menu affichées grâce à la capacité edit_posts 
+ * 
+ * La capacité edit_posts est ajouté aux administrateurs d'instance pour qu'ils puissent modérer les commentaires
+ * 
+ */
+function extranetecp_remove_edit_post_pages() {
+    
+    if ( current_user_can('manage_instances') ) {
+        remove_menu_page('edit-comments.php');
+        remove_menu_page('tools.php');
+        remove_menu_page('edit.php');
+        remove_menu_page('edit.php?post_type=page');
+    }
+}
+add_action( 'admin_menu', 'extranetecp_remove_edit_post_pages' );
+/**
+ * Empeche les administrateurs d'instance d'exécuter certaines actions directes autorisées par la capacité edit_posts
+ *
+ * La capacité edit_posts est ajouté aux administrateurs d'instance pour qu'ils puissent modérer les commentaires
+ *
+ */
+function extranetcp_prevent_admin_access() {
+    $screen=get_current_screen();
+    if ( ($screen->post_type=="post" || $screen->post_type=="page" || empty($screen->post_type)) && current_user_can('manage_instances') ) {
+        wp_die("Désolé vous n'avez pas accès à cette page.");
+        exit();
+    }
+}
+add_action( 'load-edit.php', 'extranetcp_prevent_admin_access' );
+add_action( 'load-tools.php', 'extranetcp_prevent_admin_access' );
+add_action( 'load-post.php', 'extranetcp_prevent_admin_access' );
+add_action( 'load-post-new.php', 'extranetcp_prevent_admin_access' );
+/**
+ * Personnalise la page dashboard
+ * @TODO add a custom dashboard welcome panel
+ */
+function extranetcp_customize_dashboard() {
+    global $wp_meta_boxes;
+
+    if (current_user_can('manage_instances')) {
+        unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_quick_press']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_incoming_links']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_right_now']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_plugins']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_recent_drafts']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_recent_comments']);
+        unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_primary']);
+        unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_secondary']);
+        unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_activity']);
+
+        wp_add_dashboard_widget('custom_welcome_widget', 'Accueil', 'custom_dashboard_welcome');
+        add_meta_box('custom_guide_widget', "Guide d'utilisation", 'custom_dashboard_guide', 'dashboard', 'side', 'high');
+    }
+}
+add_action('wp_dashboard_setup', 'extranetcp_customize_dashboard' );
+
+function custom_dashboard_welcome() {
+    echo "<p>Page d'acceuil du backoffice d'administration</p>";
+}
+function custom_dashboard_guide() {
+    //@TODO ajouter le guide d'utilisation
+    echo "<p>Décrire le guide d'utilisation. Le découper en plusieurs parties</p>";
+}
 
 /**
  * Custom post type et metabox
  */
-require get_template_directory() . '/inc/cpt-metaboxes.php';
+require_once get_template_directory() . '/inc/cpt-metaboxes.php';
+
+/**
+ * Custom post type map custom capabilities
+ */
+require_once get_template_directory() . '/inc/cpt-capabilites.php';
 
 /**
  * Custom tables
  */
-require get_template_directory() . '/inc/custom-tables.php';
+require_once get_template_directory() . '/inc/custom-tables.php';

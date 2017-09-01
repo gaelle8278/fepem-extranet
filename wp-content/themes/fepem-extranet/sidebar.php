@@ -7,11 +7,10 @@
 if( is_page_template('page-templates/tableau-de-bord.php') ) {
     //page supervision
     dynamic_sidebar( 'sidebar-supervision' );
-} elseif( is_singular('commission' ) ) {
+} elseif( is_singular( $list_cpt_instances ) ) {
     //page tableau de bord projet
     dynamic_sidebar( 'sidebar-tdb-project' );
-} elseif ( is_singular( ['ecp_calendrier', 'ecp_event', 'ecp_messagerie', 'ecp_message', 'ecp_ged', 'ecp_document'] ) ) {
+} elseif ( is_singular( $list_cpt_composants ) ) {
     //page internes projet
     dynamic_sidebar( 'sidebar-internal-project' );
-
 }

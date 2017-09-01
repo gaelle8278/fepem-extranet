@@ -51,19 +51,19 @@ class Extranet_Agenda_Widget extends WP_Widget {
         } elseif ( $instance['type_agenda'] == "project" ) {
             //affichage des événements de l'instance en cours d'affichage
             $composant=get_queried_object();
-            if( $composant->post_type == "ecp_messagerie" ) {
+            if( $composant->post_type == "ecp_messagerie" || $composant->post_type == "ecp_fmessagerie" ) {
                 $queried_instance = get_parent_instance_of_messagerie($composant->ID);
-            } elseif( $composant->post_type == "ecp_message" ) {
+            } elseif( $composant->post_type == "ecp_message" || $composant->post_type == "ecp_fmessage" ) {
                 $queried_instance = get_parent_instance_of_message($composant->ID);
-            } elseif( $composant->post_type == "ecp_ged" ) {
+            } elseif( $composant->post_type == "ecp_ged" || $composant->post_type == "ecp_fged" ) {
                 $queried_instance = get_parent_instance_of_ged($composant->ID);
-            } elseif( $composant->post_type == "ecp_document" ) {
+            } elseif( $composant->post_type == "ecp_document" || $composant->post_type == "ecp_fdocument" ) {
                 $queried_instance = get_parent_instance_of_doc($composant->ID);
-            } elseif( $composant->post_type == "ecp_calendrier" ) {
+            } elseif( $composant->post_type == "ecp_calendrier" || $composant->post_type == "ecp_fcalendrier" ) {
                 $queried_instance = get_parent_instance_of_calendar($composant->ID);
-            } elseif( $composant->post_type == "ecp_event" ) {
+            } elseif( $composant->post_type == "ecp_event" || $composant->post_type == "ecp_fevent" ) {
                 $queried_instance = get_parent_instance_of_event($composant->ID);
-            } elseif( $composant->post_type == "commission" ) {
+            } elseif( $composant->post_type == "commission" || $composant->post_type == "fcommission" ) {
                 $queried_instance = $composant;
             }
 
