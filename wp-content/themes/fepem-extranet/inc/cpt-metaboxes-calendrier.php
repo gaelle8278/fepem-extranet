@@ -12,14 +12,13 @@
  *
  */
 function build_metabox_event_calendar( $post ) {
+    $list_cpt_calendrier_of_event=get_cpt_calendrier_of_event();
 
     $selected_cal= wp_get_post_parent_id($post->ID);
 
     $calendar_object="";
-    if( "ecp_event" == get_post_type($post) ) {
-        $calendar_object = "ecp_calendrier";
-    } elseif ( "ecp_fevent" == get_post_type($post) ) {
-        $calendar_object = "ecp_fcalendrier";
+    if( array_key_exists( get_post_type($post), $list_cpt_calendrier_of_event) ) {
+        $calendar_object=$list_cpt_calendrier_of_event[get_post_type($post)];
     }
 
     $all_calendar=[];
@@ -100,10 +99,10 @@ function build_metabox_event_calendar( $post ) {
  * @return void
  */
 function save_metabox_event_calendar( $post_id ) {
+    $list_cpt_event=get_cpt_event();
 
     // only run this for event
-    $authorized_post_type=["ecp_event","ecp_fevent"];
-    if ( !in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( !in_array( get_post_type( $post_id ), $list_cpt_event ) ) {
         return $post_id;
     }
 
@@ -207,7 +206,6 @@ function build_metabox_notification_event( $post ) {
  *
  */
 function build_metabox_event_data( $post ) {
-    //global $post;
 
     // current cpt data
     $meta_sd = get_post_meta($post->ID, '_ecp_event_startdate', true);
@@ -257,9 +255,10 @@ function build_metabox_event_data( $post ) {
  * @return type
  */
 function save_metabox_event_data( $post_id ) {
+    $list_cpt_event=get_cpt_event();
+
     // only run this for event
-    $authorized_post_type=["ecp_event","ecp_fevent"];
-    if ( !in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( !in_array( get_post_type( $post_id ), $list_cpt_event ) ) {
         return $post_id;
     }
 
@@ -318,8 +317,10 @@ function ecp_events_edit_columns( $columns ) {
 
     return $columns;
 }
-add_filter ("manage_edit-ecp_event_columns", "ecp_events_edit_columns");
-add_filter ("manage_edit-ecp_fevent_columns", "ecp_events_edit_columns");
+$list_cpt_event=get_cpt_event();
+foreach ( $list_cpt_event as $cpt_event ) {
+    add_filter ("manage_edit-".$cpt_event."_columns", "ecp_events_edit_columns");
+}
 
 /**
  * Fonction qui définit le contenu des colonnes affichées dans la liste des événements
@@ -379,7 +380,10 @@ function ecp_event_custom_columns( $column, $post_id ) {
 
     }
 }
-add_action ("manage_posts_custom_column", "ecp_event_custom_columns", 10, 2);
+$list_cpt_event=get_cpt_event();
+foreach ( $list_cpt_event as $cpt_event ) {
+    add_action ("manage_".$cpt_event."_posts_custom_column", "ecp_event_custom_columns", 10, 2);
+}
 
 /**
  * Fonction qui met à jour les messages de mise à jour spécifique à l'événement
@@ -392,6 +396,7 @@ add_action ("manage_posts_custom_column", "ecp_event_custom_columns", 10, 2);
 function ecp_event_updated_messages( $messages ) {
 
     global $post, $post_ID;
+    $list_cpt_event=get_cpt_event();
 
     $labels = array(
         0 => '', // Unused. Messages start at index 1.
@@ -409,8 +414,9 @@ function ecp_event_updated_messages( $messages ) {
           date_i18n('M j, Y @ G:i', strtotime( $post->post_date ) ), esc_url( get_permalink($post_ID) ) ),
         10 => sprintf( "Brouillon de l'événement. <a target='_blank' href='%s'>Prévisualiser l'événment</a>", esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
       );
-    $messages['ecp_event']=$labels;
-    $messages['ecp_fevent']=$labels;
+    foreach ($list_cpt_event as $cpt_event ) {
+        $messages[$cpt_event]=$labels;
+    }
 
     return $messages;
 }

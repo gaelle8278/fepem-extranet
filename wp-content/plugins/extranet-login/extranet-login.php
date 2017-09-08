@@ -62,11 +62,25 @@ class Extranet_Login_Plugin {
         $page_definitions = array(
             'connexion' => array(
                 'title' => "Connexion",
-                'content' => '[extranet-login-form]'
+                'content' => "<h1>Se connecter à l'Epace FEPEM</h1>"
+                            . "Pour vous connecter à votre espace FEPEM, nous vous remercions de renseigner vos identifiants"
+                            . "<br /> "
+                            . "[extranet-login-form]"
             ),
             'profil' => array(
                 'title' => "Mon profil",
-                'content' => '[infos-compte]'
+                'content' => "[infos-compte]"
+            ),
+            'comment-recuperer-vos-identifiants' => array(
+                'title' => "Comment récupérer vos identifiants",
+                'content' => "<h1>Se connecter à l'Espace FEPEM</h1>"
+                            . "Pour récupérer vos identifiants, nous vous remercions de nous adresser un courriel à :"
+                            . "<br /> "
+                            . "<a href=\"mailto:contact@fepem.fr\">contact@fepem.fr</a>"
+            ),
+            'page-non-accessible' => array(
+                'title' => "Page non accessible",
+                'content' => "Vous n'avez pas accès à cette page."
             )
             /*'mot-de-passe-perdu' => array(
                 'title' => "Récupérer votre mot de passe.",
@@ -262,7 +276,8 @@ class Extranet_Login_Plugin {
                 exit;
             }
 
-            wp_redirect( home_url( 'mot-de-passe-perdu' ) );
+            //wp_redirect( home_url( 'mot-de-passe-perdu' ) );
+            wp_redirect( home_url( 'comment-recuperer-vos-identifiants' ) );
             exit;
         }
     }
@@ -527,7 +542,7 @@ class Extranet_Login_Plugin {
                 return "L'adresse email n'existe pas.";
 
             case 'incorrect_password':
-                $err = "Le mot de passe est incorrect. <a href='%s'>L'avez-vous oublié ?</a>?";
+                $err = "Le mot de passe est incorrect. <a href='%s'>L'avez-vous oublié ?</a>";
                 return sprintf( $err, wp_lostpassword_url() );
 
             case 'invalid_email':

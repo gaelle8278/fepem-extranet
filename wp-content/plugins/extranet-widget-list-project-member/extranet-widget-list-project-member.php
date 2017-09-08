@@ -32,33 +32,39 @@ class Extranet_List_Project_Members_Widget extends WP_Widget {
     * @param array $instance Saved values from database.
     */
     public function widget( $args, $instance ) {
-
+        $list_cpt_messagerie=get_cpt_messagerie();
+        $list_cpt_message=get_cpt_message();
+        $list_cpt_ged=get_cpt_ged();
+        $list_cpt_document=get_cpt_document();
+        $list_cpt_calendrier=get_cpt_calendrier();
+        $list_cpt_event=get_cpt_event();
+        $list_cpt_instances=get_cpt_instances();
 
         extract( $args );
 
         $list_members=[];
         $composant=get_queried_object();
-        if( $composant->post_type == "ecp_messagerie" || $composant->post_type == "ecp_fmessagerie" ) {
+        if( is_singular( $list_cpt_messagerie ) ) {
             $queried_instance = get_parent_instance_of_messagerie($composant->ID);
-        } elseif( $composant->post_type == "ecp_message" || $composant->post_type == "ecp_fmessage" ) {
+        } elseif( is_singular( $list_cpt_message ) ) {
             $queried_instance = get_parent_instance_of_message($composant->ID);
-        } elseif( $composant->post_type == "ecp_ged" || $composant->post_type == "ecp_fged" ) {
+        } elseif( is_singular( $list_cpt_ged ) ) {
             $queried_instance = get_parent_instance_of_ged($composant->ID);
-        } elseif( $composant->post_type == "ecp_document" || $composant->post_type == "ecp_fdocument" ) {
+        } elseif( is_singular( $list_cpt_document ) ) {
             $queried_instance = get_parent_instance_of_doc($composant->ID);
-        } elseif( $composant->post_type == "ecp_calendrier" || $composant->post_type == "ecp_fcalendrier" ) {
+        } elseif( is_singular( $list_cpt_calendrier ) ) {
             $queried_instance = get_parent_instance_of_calendar($composant->ID);
-        } elseif( $composant->post_type == "ecp_event" | $composant->post_type == "ecp_fevent" ) {
+        } elseif( is_singular( $list_cpt_event ) ) {
             $queried_instance = get_parent_instance_of_event($composant->ID);
-        } elseif( $composant->post_type == "commission" || $composant->post_type == "fcommission" ) {
+        } elseif( is_singular( $list_cpt_instances ) ) {
             $queried_instance = $composant;
         }
+        
         //si on est dans une instance et que l'utilisateur y a accès => récupération des membres de l'instance
         if(!empty($queried_instance) && check_user_access_instance($queried_instance->ID, get_current_user_id())) {
             $list_members = get_post_meta($queried_instance->ID,'_meta_members_commission',false);
         }
         
-
         $title = apply_filters( 'ecp_sidebar_widget_title', $instance['title'] );
 
         echo $before_widget;

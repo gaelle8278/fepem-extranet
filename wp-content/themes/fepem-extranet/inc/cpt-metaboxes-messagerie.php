@@ -8,18 +8,18 @@
  *
  *******************************************/
 /**
- * Fonction qui gère l'affichage de la metabox pour rattaché le message à une messagerie
+ * Fonction qui gère l'affichage de la metabox pour rattacher le message à une messagerie
  *
  * @param type $post
  */
 function build_metabox_messagerie_message( $post ) {
+    $list_cpt_messagerie_of_message=get_cpt_messagerie_of_message();
+
     $selected_messagerie= wp_get_post_parent_id($post->ID);
 
     $messagerie_object="";
-    if( "ecp_message" == get_post_type($post) ) {
-        $messagerie_object = "ecp_messagerie";
-    } elseif ( "ecp_fmessage" == get_post_type($post) ) {
-        $messagerie_object = "ecp_fmessagerie";
+    if( array_key_exists( get_post_type($post), $list_cpt_messagerie_of_message) ) {
+        $messagerie_object=$list_cpt_messagerie_of_message[get_post_type($post)];
     }
 
     $all_messagerie=[];
@@ -100,10 +100,10 @@ function build_metabox_messagerie_message( $post ) {
  * @return void
  */
 function save_metabox_messagerie_message( $post_id ) {
+    $list_cpt_message=get_cpt_message();
 
     // only run this for event
-    $authorized_post_type=["ecp_message","ecp_fmessage"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_message ) ) {
         return $post_id;
     }
 

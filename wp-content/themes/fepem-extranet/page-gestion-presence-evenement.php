@@ -17,7 +17,8 @@ if(isset($_POST) && !empty($_POST)) {
     $tache = $wp_query->query_vars['gestion_presence'];
 }
 
-if( empty($id_event) ) {
+$list_cpt_event=get_cpt_event();
+if( empty($id_event) || !in_array(get_post_type($id_event), $list_cpt_event) ) {
     ?>
     <p>Un événement doit être indiqué</p>
     <?php

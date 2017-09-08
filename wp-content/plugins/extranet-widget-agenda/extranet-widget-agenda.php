@@ -32,8 +32,13 @@ class Extranet_Agenda_Widget extends WP_Widget {
     * @param array $instance Saved values from database.
     */
     public function widget( $args, $instance ) {
-        $user_instances = get_instances_of_user( get_current_user_id() );
-
+        $list_cpt_messagerie=get_cpt_messagerie();
+        $list_cpt_message=get_cpt_message();
+        $list_cpt_ged=get_cpt_ged();
+        $list_cpt_document=get_cpt_document();
+        $list_cpt_calendrier=get_cpt_calendrier();
+        $list_cpt_event=get_cpt_event();
+        $list_cpt_instances=get_cpt_instances();
 
         extract( $args );
 
@@ -51,19 +56,19 @@ class Extranet_Agenda_Widget extends WP_Widget {
         } elseif ( $instance['type_agenda'] == "project" ) {
             //affichage des événements de l'instance en cours d'affichage
             $composant=get_queried_object();
-            if( $composant->post_type == "ecp_messagerie" || $composant->post_type == "ecp_fmessagerie" ) {
+            if( is_singular( $list_cpt_messagerie ) ) {
                 $queried_instance = get_parent_instance_of_messagerie($composant->ID);
-            } elseif( $composant->post_type == "ecp_message" || $composant->post_type == "ecp_fmessage" ) {
+            } elseif( is_singular( $list_cpt_message ) ) {
                 $queried_instance = get_parent_instance_of_message($composant->ID);
-            } elseif( $composant->post_type == "ecp_ged" || $composant->post_type == "ecp_fged" ) {
+            } elseif( is_singular( $list_cpt_ged ) ) {
                 $queried_instance = get_parent_instance_of_ged($composant->ID);
-            } elseif( $composant->post_type == "ecp_document" || $composant->post_type == "ecp_fdocument" ) {
+            } elseif( is_singular( $list_cpt_document ) ) {
                 $queried_instance = get_parent_instance_of_doc($composant->ID);
-            } elseif( $composant->post_type == "ecp_calendrier" || $composant->post_type == "ecp_fcalendrier" ) {
+            } elseif( is_singular( $list_cpt_calendrier ) ) {
                 $queried_instance = get_parent_instance_of_calendar($composant->ID);
-            } elseif( $composant->post_type == "ecp_event" || $composant->post_type == "ecp_fevent" ) {
+            } elseif( is_singular( $list_cpt_event ) ) {
                 $queried_instance = get_parent_instance_of_event($composant->ID);
-            } elseif( $composant->post_type == "commission" || $composant->post_type == "fcommission" ) {
+            } elseif( is_singular( $list_cpt_instances ) ) {
                 $queried_instance = $composant;
             }
 

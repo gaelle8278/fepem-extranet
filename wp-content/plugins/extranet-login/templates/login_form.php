@@ -50,7 +50,7 @@
                 <label for="user_pass">Mot de passe renseigné lors de l’inscription</label>
                 <input type="password" name="pwd" id="user_pass">
             </p>
-            <p><a href="<?php echo home_url('comment-recuperer-vos-identifiants'); ?>">Oubli de vos identifiants</a></p>
+            <p><?php echo sprintf( "<p><a href='%s'>Oubli de vos identifiants</a></p>", wp_lostpassword_url() ); ?>
             <p class="login-submit">
                 <input type="submit" value="Se connecter">
             </p>

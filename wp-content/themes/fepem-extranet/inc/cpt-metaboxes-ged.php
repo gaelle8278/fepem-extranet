@@ -92,8 +92,10 @@ function ecp_ged_edit_columns( $columns ) {
 
     return $columns;
 }
-add_filter ("manage_edit-ecp_ged_columns", "ecp_ged_edit_columns");
-add_filter ("manage_edit-ecp_fged_columns", "ecp_ged_edit_columns");
+$list_cpt_ged=get_cpt_ged();
+foreach ( $list_cpt_ged as $cpt_ged ) {
+    add_filter ("manage_edit-".$cpt_ged."_columns", "ecp_ged_edit_columns");
+}
 
 /**
  * Fonction qui définit le contenu des colonnes affichées dans la liste des GED
@@ -116,7 +118,10 @@ function ecp_ged_custom_columns( $column, $post_id ) {
         break;
     }
 }
-add_action ("manage_posts_custom_column", "ecp_ged_custom_columns", 10, 2);
+$list_cpt_ged=get_cpt_ged();
+foreach ( $list_cpt_ged as $cpt_ged ) {
+    add_action ("manage_".$cpt_ged."_posts_custom_column", "ecp_ged_custom_columns", 10, 2);
+}
 
 /********************************************
  * Définition du CPT Document
@@ -128,13 +133,13 @@ add_action ("manage_posts_custom_column", "ecp_ged_custom_columns", 10, 2);
  * @param WP_Post $post
  */
 function build_metabox_ged_document( $post ) {
+    $list_cpt_ged_of_document=get_cpt_ged_of_document();
+
     $selected_ged= wp_get_post_parent_id($post->ID);
 
     $ged_object="";
-    if( "ecp_document" == get_post_type($post) ) {
-        $ged_object = "ecp_ged";
-    } elseif ( "ecp_fdocument" == get_post_type($post) ) {
-        $ged_object = "ecp_fged";
+    if( array_key_exists( get_post_type($post), $list_cpt_ged_of_document) ) {
+        $ged_object=$list_cpt_ged_of_document[get_post_type($post)];
     }
 
     $all_ged=[];
@@ -216,10 +221,10 @@ function build_metabox_ged_document( $post ) {
  * @return void
  */
 function save_metabox_ged_document( $post_id ) {
+    $list_cpt_document=get_cpt_document();
 
     // only run this for event
-    $authorized_post_type=["ecp_document","ecp_fdocument"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_document ) ) {
         return $post_id;
     }
 
@@ -333,9 +338,10 @@ function build_metabox_upload_document( $post ){
  * @param int $post_id
  */
 function save_metabox_upload_document($post_id) {
+    $list_cpt_document=get_cpt_document();
+
     // only run this for document
-    $authorized_post_type=["ecp_document","ecp_fdocument"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_document ) ) {
         return $post_id;
     }
 
@@ -480,9 +486,9 @@ function ecp_document_upload_dir( $default_dir ) {
     //!!!!!!!!!!!PB objet post absent avec un custom media uploader
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     global $post;
+    $list_cpt_document=get_cpt_document();
 
-    $authorized_post_type=["ecp_document","ecp_fdocument"];
-    if ( ! in_array (get_post_type( $post->ID ),$authorized_post_type ) ) {
+    if ( ! in_array (get_post_type( $post->ID ),$list_cpt_document ) ) {
         return $default_dir;
     }
 
@@ -589,7 +595,10 @@ function ecp_document_edit_columns( $columns ) {
 
     return $columns;
 }
-add_filter ("manage_edit-ecp_document_columns", "ecp_document_edit_columns");
+$list_cpt_document=get_cpt_document();
+foreach ( $list_cpt_document as $cpt_document ) {
+    add_filter ("manage_edit-".$cpt_document."_columns", "ecp_document_edit_columns");
+}
 
 /**
  * Fonction qui définit le contenu des colonnes affichées dans la liste des événements

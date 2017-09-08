@@ -29,10 +29,9 @@ function build_metabox_members_commission( $post ) {
                     foreach( $members_commission as $idmember ) {
                         $user=get_user_by('ID',$idmember);
                         ?>
-                        <li data-id="<?php echo  $idmember; ?>"><span class="erase">x</span><?php echo $user->first_name.' '.$user->last_name; ?></li>
+                        <li data-id="<?php echo $idmember; ?>"><span class="erase">x</span><?php echo $user->first_name.' '.$user->last_name; ?></li>
                         <?php
                     }
-
                 }
                 ?>
             </ul>
@@ -113,9 +112,9 @@ function build_metabox_members_commission( $post ) {
  *
  */
 function save_metabox_members_commission( $post_id ){
+    $list_cpt_instances=get_cpt_instances();
 
-    $authorized_post_type=["commission","fcommission"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    if ( ! in_array( get_post_type( $post_id ),$list_cpt_instances ) ) {
         return $post_id;
     }
 
@@ -149,12 +148,12 @@ add_action('save_post','save_metabox_members_commission');
  * @param type $post
  */
 function build_metabox_calendar_commission( $post ) {
+    $list_cpt_calendrier_of_instance=get_cpt_calendrier_of_instance();
 
+    //liste des calendriers à proposer
     $calendar_object="";
-    if( "commission" == get_post_type($post) ) {
-        $calendar_object = "ecp_calendrier";
-    } elseif ( "fcommission" == get_post_type($post) ) {
-        $calendar_object = "ecp_fcalendrier";
+    if( array_key_exists( get_post_type($post), $list_cpt_calendrier_of_instance) ) {
+        $calendar_object=$list_cpt_calendrier_of_instance[get_post_type($post)];
     }
 
     $all_calendar=[];
@@ -167,6 +166,7 @@ function build_metabox_calendar_commission( $post ) {
         ) );
     }
 
+    //calendrier déjà sélectionné
     $selected_cal= get_post_meta($post->ID,'_meta_calendar_commission',true);
 
 
@@ -189,11 +189,12 @@ function build_metabox_calendar_commission( $post ) {
 
 /**
  * Fonction qui gère la sauvegarde du calendrier associé à la commission
- * @param type $post_id
+ * @param int $post_id
  */
 function save_metabox_calendar_commission( $post_id ) {
-    $authorized_post_type=["commission","fcommission"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    $list_cpt_instances=get_cpt_instances();
+
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_instances ) ) {
         return $post_id;
     }
 
@@ -226,12 +227,16 @@ add_action('save_post','save_metabox_calendar_commission');
  * @param type $post
  */
 function build_metabox_messagerie_commission( $post ) {
+    $list_cpt_messagerie_of_instance=get_cpt_messagerie_of_instance();
 
     $messagerie_object="";
-    if( "commission" == get_post_type($post) ) {
+    /*if( "commission" == get_post_type($post) ) {
         $messagerie_object = "ecp_messagerie";
     } elseif ( "fcommission" == get_post_type($post) ) {
         $messagerie_object = "ecp_fmessagerie";
+    }*/
+    if( array_key_exists( get_post_type($post), $list_cpt_messagerie_of_instance) ) {
+        $messagerie_object=$list_cpt_messagerie_of_instance[get_post_type($post)];
     }
 
     $all_messagerie=[];
@@ -269,8 +274,9 @@ function build_metabox_messagerie_commission( $post ) {
  * @param type $post_id
  */
 function save_metabox_messagerie_commission( $post_id ) {
-    $authorized_post_type=["commission","fcommission"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    $list_cpt_instances=get_cpt_instances();
+
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_instances ) ) {
         return $post_id;
     }
 
@@ -322,8 +328,9 @@ function build_metabox_email_contact_commission( $post ) {
  * Fontion qui sauvegarde la metabox email de contact
  */
 function save_metabox_email_contact_commission( $post_id ) {
-    $authorized_post_type=["commission","fcommission"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    $list_cpt_instances=get_cpt_instances();
+
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_instances ) ) {
         return $post_id;
     }
 
@@ -355,12 +362,17 @@ add_action('save_post','save_metabox_email_contact_commission');
  * @param type $post
  */
 function build_metabox_ged_commission( $post ) {
+    $list_cpt_ged_of_instance=get_cpt_ged_of_instance();
 
     $ged_object="";
-    if( "commission" == get_post_type($post) ) {
+    /*if( "commission" == get_post_type($post) ) {
         $ged_object = "ecp_ged";
     } elseif ( "fcommission" == get_post_type($post) ) {
         $ged_object = "ecp_fged";
+    }*/
+
+    if( array_key_exists( get_post_type($post), $list_cpt_ged_of_instance) ) {
+        $ged_object=$list_cpt_ged_of_instance[get_post_type($post)];
     }
 
     $all_ged=[];
@@ -398,8 +410,9 @@ function build_metabox_ged_commission( $post ) {
  * @param type $post_id
  */
 function save_metabox_ged_commission( $post_id ) {
-    $authorized_post_type=["commission","fcommission"];
-    if ( ! in_array( get_post_type( $post_id ), $authorized_post_type ) ) {
+    $list_cpt_instances=get_cpt_instances();
+
+    if ( ! in_array( get_post_type( $post_id ), $list_cpt_instances ) ) {
         return $post_id;
     }
 
@@ -432,4 +445,115 @@ function save_metabox_ged_commission( $post_id ) {
 
 }
 add_action('save_post','save_metabox_ged_commission');
+
+/**
+ * Fonction qui définit les colonnes à afficher dans la liste des commission
+ *
+ * @param array $columns
+ * @return string
+ */
+function commission_edit_columns( $columns ) {
+
+    $columns = array(
+        "cb" => "<input type=\"checkbox\" />",
+        "title" => "Nom",
+        "ecp_col_com_cal" => "Calendrier",
+        "ecp_col_com_mess" => "Messagerie",
+        "ecp_col_com_ged" => "GED",
+        "ecp_col_com_typepart" => "Type de participant",
+        "date" => "Date",
+        "author" => "Administrateur"
+    );
+
+    return $columns;
+}
+$list_cpt_instances=get_cpt_instances();
+foreach ( $list_cpt_instances as $cpt_instance ) {
+    add_filter ("manage_edit-".$cpt_instance."_columns", "commission_edit_columns");
+}
+
+/**
+ * Fonction qui définit le contenu des colonnes affichées dans la liste des commissions
+ *
+ * @global type $post
+ * @param type $column
+ */
+function commission_custom_columns( $column, $post_id ) {
+
+    $custom = get_post_custom($post_id);
+    $post=get_post($post_id);
+
+    switch ($column)
+    {
+        case "ecp_col_com_typepart":
+            // - show taxonomy terms -
+            $commission_type_participant = get_the_terms($post->ID, "ecp_tax_type_participant");
+            $commission_type_participant_html = [];
+            if ( !empty($commission_type_participant) ) {
+                foreach ($commission_type_participant as $commision_typepart) {
+                    array_push($commission_type_participant_html, $commision_typepart->name);
+                }
+                echo implode(", ",$commission_type_participant_html);
+            } else {
+                echo "Aucun type de participant indiqué";
+            }
+        break;
+        case "ecp_col_com_cal":
+            // - show dates -
+            $id_calendar = $custom["_meta_calendar_commission"][0];
+            if( !empty( $id_calendar ) ) {
+                echo get_the_title($id_calendar);
+            } else {
+                echo "Aucun calendrier rattaché";
+            }
+            
+        break;
+        case "ecp_col_com_mess":
+            $list_id_messageries = $custom["_meta_messagerie_commission"];
+            if( !empty( $list_id_messageries ) ) {
+                $messagerie_html=[];
+                foreach( $list_id_messageries as $id_messagerie ) {
+                    $terms_messagerie=[];
+                    $terms_typepart_messagerie=get_the_terms($id_messagerie,"ecp_tax_type_participant");
+                    if( !empty($terms_typepart_messagerie) ) {
+                        foreach( $terms_typepart_messagerie as $term) {
+                            $terms_messagerie[]=$term->name;
+                        }
+                    }
+                    $messagerie_html[]=get_the_title($id_messagerie).(!empty($terms_messagerie)?"-".implode(", ",$terms_messagerie):"");
+                }
+                echo implode(",<br/>",$messagerie_html);
+            } else {
+                echo "Aucune messagerie rattachée";
+            }
+           
+        break;
+        case "ecp_col_com_ged";
+            $list_id_geds = $custom["_meta_ged_commission"];
+            if( !empty( $list_id_geds ) ) {
+                $ged_html=[];
+                foreach( $list_id_geds as $id_ged ) {
+                    $terms_ged=[];
+                    $terms_typepart_ged=get_the_terms($id_ged,"ecp_tax_type_participant");
+                    if( !empty($terms_typepart_ged) ) {
+                        foreach( $terms_typepart_ged as $term) {
+                            $terms_ged[]=$term->name;
+                        }
+                    }
+                    $ged_html[]=get_the_title($id_ged).(!empty($terms_ged)?"-".implode(", ",$terms_ged):"");
+                }
+                echo implode(", ",$ged_html);
+            } else {
+                echo "Aucune GED rattachée";
+            }
+            
+        break;
+        
+
+    }
+}
+$list_cpt_instances= get_cpt_instances();
+foreach ( $list_cpt_instances as $cpt_instance ) {
+    add_action ("manage_".$cpt_instance."_posts_custom_column", "commission_custom_columns", 10, 2);
+}
 

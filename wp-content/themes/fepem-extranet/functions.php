@@ -4,13 +4,13 @@
  */
 
 /**
+ * Inclusion des constantes utiles
+ */
+require_once get_template_directory()."/inc/helpers.php";
+/**
  * Inclusion des fonctions utiles
  */
 require_once get_template_directory()."/inc/usefull-functions.php";
-/**
- * Inclusion des constantes utiles
- */
-require_once get_template_directory()."/inc/usefull-constants.php";
 
 /**
  * Configuration à l'initialisation
@@ -96,7 +96,6 @@ function extrafepem_custom_editor_style() {
 /*
  * Enregistrement des sidebars
  */
-add_action( 'widgets_init', 'extranetcp_register_sidebars' );
 function extranetcp_register_sidebars() {
     register_sidebar(
         array(
@@ -133,6 +132,7 @@ function extranetcp_register_sidebars() {
         )
     );
 }
+add_action( 'widgets_init', 'extranetcp_register_sidebars' );
 
 /*
  * Image responsive
@@ -164,9 +164,13 @@ add_action('post_edit_form_tag', 'extranetcp_add_edit_form_multipart_encoding');
  */
 function extranetcp_add_rewrite_calendar_pages() {
   global $wp_rewrite;
+  $list_cpt_calendrier=get_cpt_calendrier();
+
   add_rewrite_tag('%vue%','([^&]+)');
-  $wp_rewrite->add_rule('ecp_calendrier/([^/]+)/([^/]+)','index.php?ecp_calendrier=$matches[1]&vue=$matches[2]','top');
-  $wp_rewrite->add_rule('ecp_fcalendrier/([^/]+)/([^/]+)','index.php?ecp_fcalendrier=$matches[1]&vue=$matches[2]','top');
+  foreach ( $list_cpt_calendrier as $cpt_calendrier ) {
+    $wp_rewrite->add_rule($cpt_calendrier.'/([^/]+)/([^/]+)','index.php?'.$cpt_calendrier.'=$matches[1]&vue=$matches[2]','top');
+  }
+  //$wp_rewrite->add_rule('ecp_fcalendrier/([^/]+)/([^/]+)','index.php?ecp_fcalendrier=$matches[1]&vue=$matches[2]','top');
 
   $wp_rewrite->flush_rules();
 }
@@ -178,6 +182,7 @@ add_action('init', 'extranetcp_add_rewrite_calendar_pages');
  */
 function extranetcp_add_rewrite_gestion_event_presence_page() {
   global $wp_rewrite;
+
   add_rewrite_tag('%gestion_presence%','([^&]+)');
   add_rewrite_tag('%id_event%','([^&]+)');
   $wp_rewrite->add_rule('gestion-presence-evenement/([^/]+)/([^/]+)','index.php?pagename=gestion-presence-evenement&gestion_presence=$matches[1]&id_event=$matches[2]','top');
@@ -190,11 +195,11 @@ add_action('init', 'extranetcp_add_rewrite_gestion_event_presence_page');
 add_filter( 'comment_form_logged_in', '__return_empty_string' );
 
 //adaptation du format de la date affiché dans les commentaires
-add_filter( 'get_comment_date', 'extranetcp_change_comment_date_format' );
 function extranetcp_change_comment_date_format( $d ) {
     $d = date_i18n("l d F Y");
     return $d;
 }
+add_filter( 'get_comment_date', 'extranetcp_change_comment_date_format' );
 
 /**
  * Fonction appelée par requete Ajax qui met à jour la liste des membres dans les CPT messages et event
@@ -231,27 +236,10 @@ add_action( 'wp_ajax_update_members_notification', 'get_members_of_instance_byaj
  * Create custom filter for list admin comments
  */
 function extranetecp_add_filer_comments() {
+    $post_types_for_admin_comment_filter=get_types_for_admin_comment_filter();
 
-    // we are only getting the none-default post types here (no post, no page, no attachment)
-    // you can also change this, just take a look at the get_post_types() function
-    /*$args = array(
-        'public'   => true,
-        '_builtin' => false
-    );*/
-    //$post_types = get_post_types( $args, 'objects' ); // we get the post types as objects
-    $post_types=[
-        [
-            'label'=>"Messages",
-            'slug'=>"ecp_message"
-        ],
-        [
-            'label'=>"Messages Fepem",
-            'slug'=>"ecp_fmessage"
-        ],
-
-    ];
-
-    if ($post_types) { // only start if there are custom post types
+    // only start if there are custom post types
+    if ($post_types_for_admin_comment_filter) { 
 
         // make sure the name of the select field is called "post_types"
         echo '<select name="post_type" id="filter-by-post-type">';
@@ -260,7 +248,7 @@ function extranetecp_add_filer_comments() {
         echo '<option value="">Tous les commentaires</option>';
 
         // for each post-type that is found, we will create a new <option>
-        foreach ($post_types as $post_type) {
+        foreach ($post_types_for_admin_comment_filter as $post_type) {
 
             $label = $post_type['label']; // get the label of the post-type
             $name = $post_type['slug']; // get the name(slug) of the post-type
@@ -271,9 +259,7 @@ function extranetecp_add_filer_comments() {
         }
         echo '</select>';
     }
-
 }
-
 if( in_array('administrator', get_current_user_roles()) ) {
     add_action( 'restrict_manage_comments', 'extranetecp_add_filer_comments' );
 }
@@ -284,14 +270,13 @@ if( in_array('administrator', get_current_user_roles()) ) {
  */
 function extranetecp_comment_list_by_role($clauses) {
     global $pagenow;
+    $message_type_by_role=get_message_type_by_role();
     
     if ('edit-comments.php' == $pagenow && current_user_can('manage_instances')) {
         $user_roles=get_current_user_roles();
 
-        if( in_array('admin-fepem',$user_roles) ) {
-            $post_type="ecp_fmessage";
-        } elseif ( in_array('admin-fepem-exec',$user_roles) ) {
-            $post_type="ecp_message";
+        if(array_key_exists( $user_roles[0], $message_type_by_role) ) {
+            $post_type = $message_type_by_role[$user_roles[0]];
         }
         if( isset( $post_type ) ) {
             $clauses['join'] = ", wp_posts";
@@ -306,21 +291,25 @@ add_filter('comments_clauses', 'extranetecp_comment_list_by_role');
 
 /**
  * Mets à jour les stats dans le menu de la liste des commentaires en admin
- * La liste des commentaires étant filtrée selon role de l'utilisateur et le type de post
+ * La liste des commentaires étant filtrée selon role de l'utilisateur et le type de post auquel est lié le commentaire
  */
 function extranetecp_upate_list_comments_count( ) {
     global $pagenow;
+    $message_type_by_role=get_message_type_by_role();
 
     $stats_object=null;
     
     if ('edit-comments.php' == $pagenow && current_user_can('manage_instances') ) {
         //mise à jour si user à un role custom
         $user_roles=get_current_user_roles();
-        if( in_array('admin-fepem',$user_roles) ) {
+        if(array_key_exists( $user_roles[0], $message_type_by_role) ) {
+            $post_type = $message_type_by_role[$user_roles[0]];
+        }
+        /*if( in_array('admin-fepem',$user_roles) ) {
             $post_type="ecp_fmessage";
         } elseif ( in_array('admin-fepem-exec',$user_roles) ) {
             $post_type="ecp_message";
-        }
+        }*/
 
         if( isset( $post_type )) {
             $count = wp_cache_get( "comments-{$post_type}", 'counts' );
@@ -389,6 +378,7 @@ add_action( 'load-edit.php', 'extranetcp_prevent_admin_access' );
 add_action( 'load-tools.php', 'extranetcp_prevent_admin_access' );
 add_action( 'load-post.php', 'extranetcp_prevent_admin_access' );
 add_action( 'load-post-new.php', 'extranetcp_prevent_admin_access' );
+
 /**
  * Personnalise la page dashboard
  * @TODO add a custom dashboard welcome panel
@@ -420,6 +410,55 @@ function custom_dashboard_guide() {
     //@TODO ajouter le guide d'utilisation
     echo "<p>Décrire le guide d'utilisation. Le découper en plusieurs parties</p>";
 }
+
+/**
+ * Remove roles that are not allowed for the current user role.
+ */
+function extranetcp_editable_roles( $roles ) {
+    if ( current_user_can('manage_instances') ) {
+        if ( $user = wp_get_current_user() ) {
+            $allowed = extranetcp_get_allowed_assign_roles( $user );
+
+            foreach ( $roles as $role => $caps ) {
+                if ( ! in_array( $role, $allowed ) )
+                    unset( $roles[ $role ] );
+            }
+        }
+    }
+
+    return $roles;
+}
+add_filter( 'editable_roles', 'extranetcp_editable_roles' );
+
+/**
+ * Prevent users deleting/editing users with a role outside their allowance.
+ */
+function extranetcp_map_meta_cap( $caps, $cap, $user_ID, $args ) {
+    if ( ( $cap === 'edit_user' || $cap === 'delete_user' ) && $args ) {
+        //si l'utilisateur est un administrateur d'instance ont vérifie son périmètre d'action
+        if ( user_can($user_ID, 'manage_instances') ) {
+            $the_user = get_userdata( $user_ID ); // The user performing the task
+            $edited_user = get_userdata( $args[0] ); // The user being edited/deleted
+
+            // User can always edit self
+            if ( $the_user && $edited_user && $the_user->ID != $edited_user->ID ) {
+                if($cap === 'delete_user') {
+                    $allowed = extranetcp_get_allowed_delete_roles( $the_user );
+                } elseif ( $cap === 'edit_user' ) {
+                    $allowed = extranetcp_get_allowed_assign_roles( $the_user );
+                }
+
+                if ( array_diff( $edited_user->roles, $allowed ) ) {
+                    // Target user has roles outside of our limits
+                    $caps[] = 'not_allowed';
+                }
+            }
+        }
+    }
+
+    return $caps;
+}
+add_filter( 'map_meta_cap', 'extranetcp_map_meta_cap', 10, 4 );
 
 /**
  * Custom post type et metabox

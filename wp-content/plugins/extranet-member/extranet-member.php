@@ -124,9 +124,14 @@ class Extranet_Member_Plugin {
                 'delete_others_ecp_documents' => true,
                 'read_private_ecp_documents' => true,
                 'publish_ecp_documents' => true,
-                'edit_tax_public_type' => true, //capability pour pouvoir assigner la taxonomy type de public des CPT
-                'manage_instances' => true //capacité pour indiquer c'est un adinistrateur d'instances : certains entrées de menu à cacher, filtre sur les commentaires ...
-            ));
+                'assign_tax_public_type' => true, //capability pour pouvoir assigner la taxonomy type de public des CPT
+                'manage_instances' => true, //capacité pour indiquer que c'est un admnistrateur d'instances : filtre sur entrées de menu à afficher, filtre sur les commentaires, custom dashboard, filtre sur la création d'utilisateurs ...
+                'list_users' => true, 
+                'edit_users' => true,
+                'create_users' => true,
+                'delete_users' => true
+
+                ));
         add_role( 'admin-fepem', 'Administrateur Fepem',
             array(
                 'read' => true,
@@ -179,7 +184,127 @@ class Extranet_Member_Plugin {
                 'read_private_ecp_fdocuments' => true,
                 'publish_ecp_fdocuments' => true,
                 'assign_tax_public_type' => true ,
-                'manage_instances' => true
+                'manage_instances' => true,
+                'list_users' => true,
+                'edit_users' => true,
+                'create_users' => true,
+                'delete_users' => true
+        ));
+        add_role( 'admin-os', 'Administrateur OS',
+            array(
+                'read' => true,
+                'edit_pages' => true,
+                'create_posts' => true,
+                'manage_categories' => false,
+                'edit_posts' => true,
+                'moderate_comments' => true,
+                'edit_oscommissions' => true,
+                'edit_others_oscommissions' => true,
+                'delete_oscommissions' => true,
+                'delete_others_oscommissions' => true,
+                'read_private_oscommissions' => true,
+                'publish_oscommissions' => true,
+                'edit_ecp_oscalendriers' => true,
+                'edit_others_ecp_oscalendriers' => true,
+                'delete_ecp_oscalendriers' => true,
+                'delete_others_ecp_oscalendriers' => true,
+                'read_private_ecp_oscalendriers' => true,
+                'publish_ecp_oscalendriers' => true,
+                'edit_ecp_osevents' => true,
+                'edit_others_ecp_osevents' => true,
+                'delete_ecp_osevents' => true,
+                'delete_others_ecp_osevents' => true,
+                'read_private_ecp_osevents' => true,
+                'publish_ecp_osevents' => true,
+                'assign_tax_cat_event' => true,
+                'edit_ecp_osmessageries' => true,
+                'edit_others_ecp_osmessageries' => true,
+                'delete_ecp_osmessageries' => true,
+                'delete_others_ecp_osmessageries' => true,
+                'read_private_ecp_osmessageries' => true,
+                'publish_ecp_osmessageries' => true,
+                'edit_ecp_osmessages' => true,
+                'edit_others_ecp_osmessages' => true,
+                'delete_ecp_osmessages' => true,
+                'delete_others_ecp_osmessages' => true,
+                'read_private_ecp_osmessages' => true,
+                'publish_ecp_osmessages' => true,
+                'edit_ecp_osgeds' => true,
+                'edit_others_ecp_osgeds' => true,
+                'delete_ecp_osgeds' => true,
+                'delete_others_ecp_osgeds' => true,
+                'read_private_ecp_osgeds' => true,
+                'publish_ecp_osgeds' => true,
+                'edit_ecp_osdocuments' => true,
+                'edit_others_ecp_osdocuments' => true,
+                'delete_ecp_osdocuments' => true,
+                'delete_others_ecp_osdocuments' => true,
+                'read_private_ecp_osdocuments' => true,
+                'publish_ecp_osdocuments' => true,
+                'assign_tax_public_type' => true ,
+                'manage_instances' => true,
+                'list_users' => true,
+                'edit_users' => true,
+                'create_users' => true,
+                'delete_users' => true
+        ));
+        add_role( 'admin-cp', 'Administrateur CP',
+            array(
+                'read' => true,
+                'edit_pages' => true,
+                'create_posts' => true,
+                'manage_categories' => false,
+                'edit_posts' => true,
+                'moderate_comments' => true,
+                'edit_cpcommissions' => true,
+                'edit_others_cpcommissions' => true,
+                'delete_cpcommissions' => true,
+                'delete_others_cpcommissions' => true,
+                'read_private_cpcommissions' => true,
+                'publish_cpcommissions' => true,
+                'edit_ecp_cpcalendriers' => true,
+                'edit_others_ecp_cpcalendriers' => true,
+                'delete_ecp_cpcalendriers' => true,
+                'delete_others_ecp_cpcalendriers' => true,
+                'read_private_ecp_cpcalendriers' => true,
+                'publish_ecp_cpcalendriers' => true,
+                'edit_ecp_cpevents' => true,
+                'edit_others_ecp_cpevents' => true,
+                'delete_ecp_cpevents' => true,
+                'delete_others_ecp_cpevents' => true,
+                'read_private_ecp_cpevents' => true,
+                'publish_ecp_cpevents' => true,
+                'assign_tax_cat_event' => true,
+                'edit_ecp_cpmessageries' => true,
+                'edit_others_ecp_cpmessageries' => true,
+                'delete_ecp_cpmessageries' => true,
+                'delete_others_ecp_cpmessageries' => true,
+                'read_private_ecp_cpmessageries' => true,
+                'publish_ecp_cpmessageries' => true,
+                'edit_ecp_cpmessages' => true,
+                'edit_others_ecp_cpmessages' => true,
+                'delete_ecp_cpmessages' => true,
+                'delete_others_ecp_cpmessages' => true,
+                'read_private_ecp_cpmessages' => true,
+                'publish_ecp_cpmessages' => true,
+                'edit_ecp_cpgeds' => true,
+                'edit_others_ecp_cpgeds' => true,
+                'delete_ecp_cpgeds' => true,
+                'delete_others_ecp_cpgeds' => true,
+                'read_private_ecp_cpgeds' => true,
+                'publish_ecp_cpgeds' => true,
+                'edit_ecp_cpdocuments' => true,
+                'edit_others_ecp_cpdocuments' => true,
+                'delete_ecp_cpdocuments' => true,
+                'delete_others_ecp_cpdocuments' => true,
+                'read_private_ecp_cpdocuments' => true,
+                'publish_ecp_cpdocuments' => true,
+                'assign_tax_public_type' => true ,
+                'manage_instances' => true,
+                'list_users' => true,
+                'edit_users' => true,
+                'create_users' => true,
+                'delete_users' => true
 
         ));
     }
@@ -192,6 +317,8 @@ class Extranet_Member_Plugin {
     public function remove_bo_roles() {
         remove_role( 'admin-fepem-exec' );
         remove_role( 'admin-fepem' );
+        remove_role( 'admin-os' );
+        remove_role( 'admin-cp' );
     }
 
     /**
@@ -215,6 +342,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_fcommissions' );
         $role->add_cap( 'delete_fcommissions' );
         $role->add_cap( 'delete_others_fcommissions' );
+        //commission os
+        $role->add_cap( 'read_private_oscommissions' );
+        $role->add_cap( 'publish_oscommissions' );
+        $role->add_cap( 'edit_oscommissions' );
+        $role->add_cap( 'edit_others_oscommissions' );
+        $role->add_cap( 'delete_oscommissions' );
+        $role->add_cap( 'delete_others_oscommissions' );
+        //commission cp
+        $role->add_cap( 'read_private_cpcommissions' );
+        $role->add_cap( 'publish_cpcommissions' );
+        $role->add_cap( 'edit_cpcommissions' );
+        $role->add_cap( 'edit_others_cpcommissions' );
+        $role->add_cap( 'delete_cpcommissions' );
+        $role->add_cap( 'delete_others_cpcommissions' );
         //calendrier fepem executif
         $role->add_cap( 'read_private_ecp_calendriers' );
         $role->add_cap( 'publish_ecp_calendriers' );
@@ -229,6 +370,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fcalendriers' );
         $role->add_cap( 'delete_ecp_fcalendriers' );
         $role->add_cap( 'delete_others_ecp_fcalendriers' );
+        //calendrier os
+        $role->add_cap( 'read_private_ecp_oscalendriers' );
+        $role->add_cap( 'publish_ecp_oscalendriers' );
+        $role->add_cap( 'edit_ecp_oscalendriers' );
+        $role->add_cap( 'edit_others_ecp_oscalendriers' );
+        $role->add_cap( 'delete_ecp_oscalendriers' );
+        $role->add_cap( 'delete_others_ecp_oscalendriers' );
+        //calendrier cp
+        $role->add_cap( 'read_private_ecp_cpcalendriers' );
+        $role->add_cap( 'publish_ecp_cpcalendriers' );
+        $role->add_cap( 'edit_ecp_cpcalendriers' );
+        $role->add_cap( 'edit_others_ecp_cpcalendriers' );
+        $role->add_cap( 'delete_ecp_cpcalendriers' );
+        $role->add_cap( 'delete_others_ecp_cpcalendriers' );
         //event fepem executif
         $role->add_cap( 'read_private_ecp_events' );
         $role->add_cap( 'publish_ecp_events' );
@@ -243,6 +398,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fevents' );
         $role->add_cap( 'delete_ecp_fevents' );
         $role->add_cap( 'delete_others_ecp_fevents' );
+        //event os
+        $role->add_cap( 'read_private_ecp_osevents' );
+        $role->add_cap( 'publish_ecp_osevents' );
+        $role->add_cap( 'edit_ecp_osevents' );
+        $role->add_cap( 'edit_others_ecp_osevents' );
+        $role->add_cap( 'delete_ecp_osevents' );
+        $role->add_cap( 'delete_others_ecp_osevents' );
+        //event cp
+        $role->add_cap( 'read_private_ecp_cpevents' );
+        $role->add_cap( 'publish_ecp_cpevents' );
+        $role->add_cap( 'edit_ecp_cpevents' );
+        $role->add_cap( 'edit_others_ecp_cpevents' );
+        $role->add_cap( 'delete_ecp_cpevents' );
+        $role->add_cap( 'delete_others_ecp_cpevents' );
         //messagerie fepem executif
         $role->add_cap( 'read_private_ecp_messageries' );
         $role->add_cap( 'publish_ecp_messageries' );
@@ -257,6 +426,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fmessageries' );
         $role->add_cap( 'delete_ecp_fmessageries' );
         $role->add_cap( 'delete_others_ecp_fmessageries' );
+        //messagerie os
+        $role->add_cap( 'read_private_ecp_osmessageries' );
+        $role->add_cap( 'publish_ecp_osmessageries' );
+        $role->add_cap( 'edit_ecp_osmessageries' );
+        $role->add_cap( 'edit_others_ecp_osmessageries' );
+        $role->add_cap( 'delete_ecp_osmessageries' );
+        $role->add_cap( 'delete_others_ecp_osmessageries' );
+        //messagerie cp
+        $role->add_cap( 'read_private_ecp_cpmessageries' );
+        $role->add_cap( 'publish_ecp_cpmessageries' );
+        $role->add_cap( 'edit_ecp_cpmessageries' );
+        $role->add_cap( 'edit_others_ecp_cpmessageries' );
+        $role->add_cap( 'delete_ecp_cpmessageries' );
+        $role->add_cap( 'delete_others_ecp_cpmessageries' );
         //message fepem executif
         $role->add_cap( 'read_private_ecp_messages' );
         $role->add_cap( 'publish_ecp_messages' );
@@ -271,6 +454,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fmessages' );
         $role->add_cap( 'delete_ecp_fmessages' );
         $role->add_cap( 'delete_others_ecp_fmessages' );
+        //messages os
+        $role->add_cap( 'read_private_ecp_osmessages' );
+        $role->add_cap( 'publish_ecp_osmessages' );
+        $role->add_cap( 'edit_ecp_osmessages' );
+        $role->add_cap( 'edit_others_ecp_osmessages' );
+        $role->add_cap( 'delete_ecp_osmessages' );
+        $role->add_cap( 'delete_others_ecp_osmessages' );
+        //messages cp
+        $role->add_cap( 'read_private_ecp_cpmessages' );
+        $role->add_cap( 'publish_ecp_cpmessages' );
+        $role->add_cap( 'edit_ecp_cpmessages' );
+        $role->add_cap( 'edit_others_ecp_cpmessages' );
+        $role->add_cap( 'delete_ecp_cpmessages' );
+        $role->add_cap( 'delete_others_ecp_cpmessages' );
         //ged fepem executif
         $role->add_cap( 'read_private_ecp_geds' );
         $role->add_cap( 'publish_ecp_geds' );
@@ -285,6 +482,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fgeds' );
         $role->add_cap( 'delete_ecp_fgeds' );
         $role->add_cap( 'delete_others_ecp_fgeds' );
+        //ged os
+        $role->add_cap( 'read_private_ecp_osgeds' );
+        $role->add_cap( 'publish_ecp_osgeds' );
+        $role->add_cap( 'edit_ecp_osgeds' );
+        $role->add_cap( 'edit_others_ecp_osgeds' );
+        $role->add_cap( 'delete_ecp_osgeds' );
+        $role->add_cap( 'delete_others_ecp_osgeds' );
+        //ged cp
+        $role->add_cap( 'read_private_ecp_cpgeds' );
+        $role->add_cap( 'publish_ecp_cpgeds' );
+        $role->add_cap( 'edit_ecp_cpgeds' );
+        $role->add_cap( 'edit_others_ecp_cpgeds' );
+        $role->add_cap( 'delete_ecp_cpgeds' );
+        $role->add_cap( 'delete_others_ecp_cpgeds' );
         //document fepem executif
         $role->add_cap( 'read_private_ecp_documents' );
         $role->add_cap( 'publish_ecp_documents' );
@@ -299,6 +510,20 @@ class Extranet_Member_Plugin {
         $role->add_cap( 'edit_others_ecp_fdocuments' );
         $role->add_cap( 'delete_ecp_fdocuments' );
         $role->add_cap( 'delete_others_ecp_fdocuments' );
+        //document os
+        $role->add_cap( 'read_private_ecp_osdocuments' );
+        $role->add_cap( 'publish_ecp_osdocuments' );
+        $role->add_cap( 'edit_ecp_osdocuments' );
+        $role->add_cap( 'edit_others_ecp_osdocuments' );
+        $role->add_cap( 'delete_ecp_osdocuments' );
+        $role->add_cap( 'delete_others_ecp_osdocuments' );
+        //document cp
+        $role->add_cap( 'read_private_ecp_cpdocuments' );
+        $role->add_cap( 'publish_ecp_cpdocuments' );
+        $role->add_cap( 'edit_ecp_cpdocuments' );
+        $role->add_cap( 'edit_others_ecp_cpdocuments' );
+        $role->add_cap( 'delete_ecp_cpdocuments' );
+        $role->add_cap( 'delete_others_ecp_cpdocuments' );
 
     }
 
@@ -323,6 +548,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_fcommissions' );
         $role->remove_cap( 'delete_fcommissions' );
         $role->remove_cap( 'delete_others_fcommissions' );
+        //commission os
+        $role->remove_cap( 'read_private_oscommissions' );
+        $role->remove_cap( 'publish_oscommissions' );
+        $role->remove_cap( 'edit_oscommissions' );
+        $role->remove_cap( 'edit_others_oscommissions' );
+        $role->remove_cap( 'delete_oscommissions' );
+        $role->remove_cap( 'delete_others_oscommissions' );
+        //commission cp
+        $role->remove_cap( 'read_private_cpcommissions' );
+        $role->remove_cap( 'publish_cpcommissions' );
+        $role->remove_cap( 'edit_cpcommissions' );
+        $role->remove_cap( 'edit_others_cpcommissions' );
+        $role->remove_cap( 'delete_cpcommissions' );
+        $role->remove_cap( 'delete_others_cpcommissions' );
         //calendrier fepem executif
         $role->remove_cap( 'read_private_ecp_calendriers' );
         $role->remove_cap( 'publish_ecp_calendriers' );
@@ -337,6 +576,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fcalendriers' );
         $role->remove_cap( 'delete_ecp_fcalendriers' );
         $role->remove_cap( 'delete_others_ecp_fcalendriers' );
+        //calendrier os
+        $role->remove_cap( 'read_private_ecp_oscalendriers' );
+        $role->remove_cap( 'publish_ecp_oscalendriers' );
+        $role->remove_cap( 'edit_ecp_oscalendriers' );
+        $role->remove_cap( 'edit_others_ecp_oscalendriers' );
+        $role->remove_cap( 'delete_ecp_oscalendriers' );
+        $role->remove_cap( 'delete_others_ecp_oscalendriers' );
+        //calendrier cp
+        $role->remove_cap( 'read_private_ecp_cpcalendriers' );
+        $role->remove_cap( 'publish_ecp_cpcalendriers' );
+        $role->remove_cap( 'edit_ecp_cpcalendriers' );
+        $role->remove_cap( 'edit_others_ecp_cpcalendriers' );
+        $role->remove_cap( 'delete_ecp_cpcalendriers' );
+        $role->remove_cap( 'delete_others_ecp_cpcalendriers' );
         //event fepem executif
         $role->remove_cap( 'read_private_ecp_events' );
         $role->remove_cap( 'publish_ecp_events' );
@@ -351,6 +604,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fevents' );
         $role->remove_cap( 'delete_ecp_fevents' );
         $role->remove_cap( 'delete_others_ecp_fevents' );
+        //event os
+        $role->remove_cap( 'read_private_ecp_osevents' );
+        $role->remove_cap( 'publish_ecp_osevents' );
+        $role->remove_cap( 'edit_ecp_osevents' );
+        $role->remove_cap( 'edit_others_ecp_osevents' );
+        $role->remove_cap( 'delete_ecp_osevents' );
+        $role->remove_cap( 'delete_others_ecp_osevents' );
+        //event cp
+        $role->remove_cap( 'read_private_ecp_cpevents' );
+        $role->remove_cap( 'publish_ecp_cpevents' );
+        $role->remove_cap( 'edit_ecp_cpevents' );
+        $role->remove_cap( 'edit_others_ecp_cpevents' );
+        $role->remove_cap( 'delete_ecp_cpevents' );
+        $role->remove_cap( 'delete_others_ecp_cpevents' );
         //messagerie fepem executif
         $role->remove_cap( 'read_private_ecp_messageries' );
         $role->remove_cap( 'publish_ecp_messageries' );
@@ -365,6 +632,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fmessageries' );
         $role->remove_cap( 'delete_ecp_fmessageries' );
         $role->remove_cap( 'delete_others_ecp_fmessageries' );
+        //messagerie os
+        $role->remove_cap( 'read_private_ecp_osmessageries' );
+        $role->remove_cap( 'publish_ecp_osmessageries' );
+        $role->remove_cap( 'edit_ecp_osmessageries' );
+        $role->remove_cap( 'edit_others_ecp_osmessageries' );
+        $role->remove_cap( 'delete_ecp_osmessageries' );
+        $role->remove_cap( 'delete_others_ecp_osmessageries' );
+        //messagerie cp
+        $role->remove_cap( 'read_private_ecp_cpmessageries' );
+        $role->remove_cap( 'publish_ecp_cpmessageries' );
+        $role->remove_cap( 'edit_ecp_cpmessageries' );
+        $role->remove_cap( 'edit_others_ecp_cpmessageries' );
+        $role->remove_cap( 'delete_ecp_cpmessageries' );
+        $role->remove_cap( 'delete_others_ecp_cpmessageries' );
         //message fepem executif
         $role->remove_cap( 'read_private_ecp_messages' );
         $role->remove_cap( 'publish_ecp_messages' );
@@ -379,6 +660,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fmessages' );
         $role->remove_cap( 'delete_ecp_fmessages' );
         $role->remove_cap( 'delete_others_ecp_fmessages' );
+        //messages os
+        $role->remove_cap( 'read_private_ecp_osmessages' );
+        $role->remove_cap( 'publish_ecp_osmessages' );
+        $role->remove_cap( 'edit_ecp_osmessages' );
+        $role->remove_cap( 'edit_others_ecp_osmessages' );
+        $role->remove_cap( 'delete_ecp_osmessages' );
+        $role->remove_cap( 'delete_others_ecp_osmessages' );
+        //messages cp
+        $role->remove_cap( 'read_private_ecp_cpmessages' );
+        $role->remove_cap( 'publish_ecp_cpmessages' );
+        $role->remove_cap( 'edit_ecp_cpmessages' );
+        $role->remove_cap( 'edit_others_ecp_cpmessages' );
+        $role->remove_cap( 'delete_ecp_cpmessages' );
+        $role->remove_cap( 'delete_others_ecp_cpmessages' );
         //ged fepem executif
         $role->remove_cap( 'read_private_ecp_geds' );
         $role->remove_cap( 'publish_ecp_geds' );
@@ -393,6 +688,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fgeds' );
         $role->remove_cap( 'delete_ecp_fgeds' );
         $role->remove_cap( 'delete_others_ecp_fgeds' );
+        //ged os
+        $role->remove_cap( 'read_private_ecp_osgeds' );
+        $role->remove_cap( 'publish_ecp_osgeds' );
+        $role->remove_cap( 'edit_ecp_osgeds' );
+        $role->remove_cap( 'edit_others_ecp_osgeds' );
+        $role->remove_cap( 'delete_ecp_osgeds' );
+        $role->remove_cap( 'delete_others_ecp_osgeds' );
+        //ged cp
+        $role->remove_cap( 'read_private_ecp_cpgeds' );
+        $role->remove_cap( 'publish_ecp_cpgeds' );
+        $role->remove_cap( 'edit_ecp_cpgeds' );
+        $role->remove_cap( 'edit_others_ecp_cpgeds' );
+        $role->remove_cap( 'delete_ecp_cpgeds' );
+        $role->remove_cap( 'delete_others_ecp_cpgeds' );
         //document fepem executif
         $role->remove_cap( 'read_private_ecp_documents' );
         $role->remove_cap( 'publish_ecp_documents' );
@@ -407,6 +716,20 @@ class Extranet_Member_Plugin {
         $role->remove_cap( 'edit_others_ecp_fdocuments' );
         $role->remove_cap( 'delete_ecp_fdocuments' );
         $role->remove_cap( 'delete_others_ecp_fdocuments' );
+        //document os
+        $role->remove_cap( 'read_private_ecp_osdocuments' );
+        $role->remove_cap( 'publish_ecp_osdocuments' );
+        $role->remove_cap( 'edit_ecp_osdocuments' );
+        $role->remove_cap( 'edit_others_ecp_osdocuments' );
+        $role->remove_cap( 'delete_ecp_osdocuments' );
+        $role->remove_cap( 'delete_others_ecp_osdocuments' );
+        //document cp
+        $role->remove_cap( 'read_private_ecp_cpdocuments' );
+        $role->remove_cap( 'publish_ecp_cpdocuments' );
+        $role->remove_cap( 'edit_ecp_cpdocuments' );
+        $role->remove_cap( 'edit_others_ecp_cpdocuments' );
+        $role->remove_cap( 'delete_ecp_cpdocuments' );
+        $role->remove_cap( 'delete_others_ecp_cpdocuments' );
     }
 
     /**
@@ -469,7 +792,7 @@ class Extranet_Member_Plugin {
         $listRegions=['Auvergne-Rhône-Alpes','Bourgogne-Franche-Comté','Bretagne','Centre-Val de Loire','Corse','Grand Est','Guadeloupe','Guyane',
             'Hauts-de-France','Île-de-France','La Réunion','Martinique','Mayotte','Normandie','Nouvelle-Aquitaine','Occitanie','Pays de la Loire',"Provence-Alpes-Côte d'Azur"];
         ?>
-        <h3>Informations supplémentaires</h3>
+        <h3>Informations supplémentaires pour les membres Extranet</h3>
 
         <table class="form-table">
 
@@ -516,11 +839,11 @@ class Extranet_Member_Plugin {
         </table>
         <?php
 
-        /* Make sure the user can assign terms of the profession taxonomy before proceeding. */
+        /* Make sure the user can assign terms of the type de membre taxonomy before proceeding. */
 	if ( !current_user_can( $tax->cap->assign_terms ) )
 		return;
 
-        /* Get the terms of the 'profession' taxonomy. */
+        /* Get the terms of the 'type de membre' taxonomy. */
 	$terms = get_terms( 'ecp_tax_type_membre', array( 'hide_empty' => false ) );
 
         ?>
@@ -530,7 +853,7 @@ class Extranet_Member_Plugin {
             <tr>
                 <th><label for="profession">Choisir le type de membre</label></th>
                 <td><?php
-                    /* If there are any profession terms, loop through them and display checkboxes. */
+                    /* If there are any type de membre terms, loop through them and display checkboxes. */
                     if ( !empty( $terms ) ) {
 			foreach ( $terms as $term ) {
                             ?>
@@ -538,10 +861,10 @@ class Extranet_Member_Plugin {
                                    value="<?php echo esc_attr( $term->slug ); ?>"
                                        <?php
                                        if( is_object($user) ) {
-                                        checked( true, is_object_in_term( $user->ID, 'ecp_tax_type_membre', $term ) );
+                                            checked( true, is_object_in_term( $user->ID, 'ecp_tax_type_membre', $term ) );
                                        }
                                        ?> />
-                            <label for="type-memebre-<?php echo esc_attr( $term->slug ); ?>"><?php echo $term->name; ?></label> <br />
+                            <label for="type-membre-<?php echo esc_attr( $term->slug ); ?>"><?php echo $term->name; ?></label> <br />
                             <?php
 
                             }
@@ -617,10 +940,10 @@ class Extranet_Member_Plugin {
 				'slug' => 'type-de-membre'
 		),
 		'capabilities' => array(
-				'manage_terms' => 'edit_users', // Using 'edit_users' cap to keep this simple.
-				'edit_terms'   => 'edit_users',
-				'delete_terms' => 'edit_users',
-				'assign_terms' => 'read',
+				'manage_terms' => 'manage_options', 
+				'edit_terms'   => 'manage_options',
+				'delete_terms' => 'manage_options',
+				'assign_terms' => 'assign_tax_public_type',
 		),
 		'update_count_callback' => 'update_type_de_membre_count' // Use a custom function to update the count.
             )
@@ -664,7 +987,7 @@ class Extranet_Member_Plugin {
     }
 
     /**
-    * Unsets the 'posts' column and adds a 'users' column on the manage profession admin page.
+    * Unsets the 'posts' column and adds a 'users' column on the manage ecp_tax_type_membre admin page.
     *
     * @param array $columns An array of columns to be shown in the manage terms table.
     */

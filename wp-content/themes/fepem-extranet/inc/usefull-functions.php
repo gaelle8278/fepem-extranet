@@ -44,16 +44,7 @@ function redirect_user_if_no_access_extranet() {
 }
 
 /**
- * Function to get defined custom roles
- */
-function get_custom_roles() {
-    $custom_roles=['admin-fepem-exec','admin-fepem'];
-
-    return $custom_roles;
-}
-
-/**
- * Fonction pour vérifier si utilisateur connecté à accès à la commission
+ * Fonction pour vérifier si utilisateur peut accéder à la commission
  *
  * @param   int $id_commission  identifier of commission
  * @param   int $id_user        identifier of user
@@ -62,6 +53,10 @@ function get_custom_roles() {
  */
 function check_user_access_instance($id_commission, $id_user=0) {
     $access=false;
+
+    if( $id_user==0 ) {
+        return $access;
+    }
 
     $list_members = get_post_meta($id_commission,"_meta_members_commission", false);
 
@@ -72,6 +67,54 @@ function check_user_access_instance($id_commission, $id_user=0) {
 
     return $access;
 }
+/**
+ * Fonction pour vérifier si l'utilisateur peut accéder au CPT
+ * le type de membre de l'utilisateur doit correspondre au type de participant du CPT
+ *
+ * @param   int $id_cpt     id of cpt
+ * @param   int $id_user    id of user
+ * @return  boolean         can view or not
+ */
+function check_user_type_can_access_cpt($id_cpt, $id_user=0) {
+    
+    $list_cpt_document=get_cpt_document();
+    $list_cpt_message=get_cpt_message();
+
+    $access=false;
+
+    if( $id_user==0 ) {
+        return $access;
+    }
+
+    //get user taxonomy "Type de membre"
+    $slug_type_of_user="";
+    $terms_of_user=wp_get_object_terms($id_user, 'ecp_tax_type_membre');
+    if( !empty( $terms_of_user ) ) {
+        $type_of_user=$terms_of_user[0];
+        $slug_type_of_user=$type_of_user->slug;
+    }
+
+    //get cpt taxonomy "Type de participant"
+    $slug_types_of_cpt=[];
+    $post_type=get_post_type($id_cpt);
+    if( in_array( $post_type,$list_cpt_message ) || in_array( $post_type,$list_cpt_document ) ) {
+        $terms_of_cpt=get_the_terms(wp_get_post_parent_id($id_cpt),'ecp_tax_type_participant');
+    } else {
+        $terms_of_cpt=get_the_terms($id_cpt, 'ecp_tax_type_participant');
+    }
+    foreach( $terms_of_cpt as $term ) {
+        $slug_types_of_cpt[]=$term->slug;
+    }
+
+    //check if user taxonomy is included in cpt taxonomy
+    if(in_array($slug_type_of_user, $slug_types_of_cpt) ) {
+        $access=true;
+    }
+
+    return $access;
+
+}
+
 /**
  * Fonction qui retrouve l'instance à laquelle appartient le message
  *
@@ -101,6 +144,8 @@ function get_parent_instance_of_message($id_message) {
  * @param int $id_calendar
  */
 function get_parent_instance_of_calendar($id_calendar) {
+    $list_cpt_instances = get_cpt_instances();
+
     $instance="";
 
     if(empty( $id_calendar )) {
@@ -108,7 +153,7 @@ function get_parent_instance_of_calendar($id_calendar) {
     }
     
     $instances = get_posts(array(
-        'post_type' => array('commission','fcommission'),
+        'post_type' => $list_cpt_instances,
         'meta_key' => '_meta_calendar_commission',
         'meta_value' => $id_calendar,
         'no_found_rows' => true
@@ -128,6 +173,8 @@ function get_parent_instance_of_calendar($id_calendar) {
  * @return  objet                       instance
  */
 function get_parent_instance_of_messagerie($id_messagerie) {
+    $list_cpt_instances = get_cpt_instances();
+
     $instance="";
     
     if(empty( $id_messagerie )) {
@@ -135,7 +182,7 @@ function get_parent_instance_of_messagerie($id_messagerie) {
     }
     
     $instances = get_posts(array(
-        'post_type' => array('commission','fcommission'),
+        'post_type' => $list_cpt_instances,
         'meta_key' => '_meta_messagerie_commission',
         'meta_value' => $id_messagerie,
         'no_found_rows' => true
@@ -154,6 +201,8 @@ function get_parent_instance_of_messagerie($id_messagerie) {
  * @return  objet                       instance
  */
 function get_parent_instance_of_ged($id_ged) {
+    $list_cpt_instances = get_cpt_instances();
+
     $instance="";
 
     if(empty( $id_ged )){
@@ -161,7 +210,7 @@ function get_parent_instance_of_ged($id_ged) {
     }
 
     $instances = get_posts(array(
-        'post_type' => array('commission','fcommission'),
+        'post_type' => $list_cpt_instances,
         'meta_key' => '_meta_ged_commission',
         'meta_value' => $id_ged,
         'no_found_rows' => true
@@ -221,13 +270,13 @@ function get_parent_instance_of_event($id_event){
 /**
  * Fonction pour convertir la date en français d'un événement en timestamp
  *
- * @global  array       $monthsfrtonb   tableau de correspondance entre mois en français et en mois en chiffre
  * @param   string      $date           date à convertir
  * @param   string      $time           horaire à convertir
  * @return  string                      Stimestamp
  */
 function dateEventfr2timestamp( $date, $time ) {
-    global $monthsfrtonb;
+
+    $monthsfrtonb=get_months_nb();
 
     list($jour,$mois,$annee)=explode(' ',$date);
     list($heure,$minute)=explode('h',$time);
@@ -246,8 +295,6 @@ function dateEventfr2timestamp( $date, $time ) {
  */
 function sort_instance_composants_by_date($composants_date, $composants_data) {
     $composants_sorted=[];
-
-    
 
     uasort($composants_date, "cmp");
 
@@ -288,48 +335,48 @@ function getcomposants_of_instances($list_id_instances, $messagerie=true, $comme
     foreach ($list_id_instances as $id_instance) {
         //nom de l'instance
         $instance_title = get_the_title($id_instance);
+        //user connecté
+        $id_user=get_current_user_id();
         //récupération des messagerie/messages
         if($messagerie == true) {
             $messageries=get_post_meta($id_instance,'_meta_messagerie_commission');
 
-            //@TODO : ajouter le filtre sur le type de public pour ne prendre en compte que la bonne messagerie
             if (!empty($messageries)) {
                 foreach($messageries as $id_messagerie) {
+                    //si le type de membre du user et le type de participant de la messagerie correspondent
+                    if( check_user_type_can_access_cpt($id_messagerie,$id_user) ) {
+                        $messages=getmessages_of_messagerie($id_messagerie);
+                        if(!empty($messages)) {
+                            foreach($messages as $message) {
+                                $instance_composants_date['message_'.$message->ID]=$message->post_date;
 
-                    $messages=getmessages_of_messagerie($id_messagerie);
+                                $list_composants_instance['message_'.$message->ID]['tag'] ='message';
+                                $list_composants_instance['message_'.$message->ID]['tag-class'] ='tag-message';
+                                $list_composants_instance['message_'.$message->ID]['titre'] = $message->post_title;
+                                $list_composants_instance['message_'.$message->ID]['lien'] = get_permalink($message->ID);
+                                $list_composants_instance['message_'.$message->ID]['date'] = $message->post_date;
+                                $list_composants_instance['message_'.$message->ID]['parent-instance-title'] =  $instance_title;
 
-                    if(!empty($messages)) {
-                        foreach($messages as $message) {
-                            $instance_composants_date['message_'.$message->ID]=$message->post_date;
+                                if($comment==true) {
+                                    // récupération des commentaires du message
+                                    $list_comments = getcomments_of_message( $message->ID );
+                                    if(!empty($list_comments)) {
+                                        foreach($list_comments as $comment) {
+                                            $instance_composants_date['comment_'.$comment->comment_ID]=$comment->comment_date;
 
-                            $list_composants_instance['message_'.$message->ID]['tag'] ='message';
-                            $list_composants_instance['message_'.$message->ID]['tag-class'] ='tag-message';
-                            $list_composants_instance['message_'.$message->ID]['titre'] = $message->post_title;
-                            $list_composants_instance['message_'.$message->ID]['lien'] = get_permalink($message->ID);
-                            $list_composants_instance['message_'.$message->ID]['date'] = $message->post_date;
-                            $list_composants_instance['message_'.$message->ID]['parent-instance-title'] =  $instance_title;
-
-                            if($comment==true) {
-                                // récupération des commentaires du message
-                                $list_comments = getcomments_of_message( $message->ID );
-                                                        
-                                //var_dump($list_comments);
-                                if(!empty($list_comments)) {
-                                    foreach($list_comments as $comment) {
-                                        $instance_composants_date['comment_'.$comment->comment_ID]=$comment->comment_date;
-
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['tag'] ='commentaire';
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['tag-class'] ='tag-comment';
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['titre'] = substr($comment->comment_content,0, 20);
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['lien'] = get_permalink($message->ID);
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['date'] = $comment->comment_date;
-                                        $list_composants_instance['comment_'.$comment->comment_ID]['parent-instance-title'] = $instance_title;
-                                    }
-                                } // fin liste des commentaires
-                            }
-                        }//fin liste des messages
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['tag'] ='commentaire';
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['tag-class'] ='tag-comment';
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['titre'] = substr($comment->comment_content,0, 20);
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['lien'] = get_permalink($message->ID);
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['date'] = $comment->comment_date;
+                                            $list_composants_instance['comment_'.$comment->comment_ID]['parent-instance-title'] = $instance_title;
+                                        }
+                                    } // fin liste des commentaires
+                                }
+                            }//fin liste des messages
+                        }
                     }
-                } // fin liste des messgaeries
+                } // fin liste des messageries
             }
         }
 
@@ -357,21 +404,22 @@ function getcomposants_of_instances($list_id_instances, $messagerie=true, $comme
         if($doc==true) {
             //récupération des documents
             $geds= get_post_meta($id_instance, '_meta_ged_commission');
-
-            //@TODO : ajouter le filtre sur le type de public pour ne prendre en compte que la bonne GED
             if (!empty($geds)) {
                 foreach($geds as $id_ged) {
-                    $docs = getdocuments_of_ged($id_ged);
-                    if(!empty($docs)) {
-                        foreach($docs as $doc) {
-                            $instance_composants_date['doc_'.$doc->ID]=$doc->post_date;
+                    //si le type de membre du user et le type de participant de la GED correspondent
+                    if( check_user_type_can_access_cpt($id_ged,$id_user) ) {
+                        $docs = getdocuments_of_ged($id_ged);
+                        if(!empty($docs)) {
+                            foreach($docs as $doc) {
+                                $instance_composants_date['doc_'.$doc->ID]=$doc->post_date;
 
-                            $list_composants_instance['doc_'.$doc->ID]['tag'] ='document';
-                            $list_composants_instance['doc_'.$doc->ID]['tag-class'] ='tag-doc';
-                            $list_composants_instance['doc_'.$doc->ID]['titre'] = $doc->post_title;
-                            $list_composants_instance['doc_'.$doc->ID]['lien'] = get_permalink($doc->ID);
-                            $list_composants_instance['doc_'.$doc->ID]['date'] = $doc->post_date;
-                            $list_composants_instance['doc_'.$doc->ID]['parent-instance-title'] = $instance_title;
+                                $list_composants_instance['doc_'.$doc->ID]['tag'] ='document';
+                                $list_composants_instance['doc_'.$doc->ID]['tag-class'] ='tag-doc';
+                                $list_composants_instance['doc_'.$doc->ID]['titre'] = $doc->post_title;
+                                $list_composants_instance['doc_'.$doc->ID]['lien'] = get_permalink($doc->ID);
+                                $list_composants_instance['doc_'.$doc->ID]['date'] = $doc->post_date;
+                                $list_composants_instance['doc_'.$doc->ID]['parent-instance-title'] = $instance_title;
+                            }
                         }
                     }
                 }
@@ -393,20 +441,21 @@ function getcomposants_of_instances($list_id_instances, $messagerie=true, $comme
  * @param int $id_messagerie    id de la messagerie dont il faut récupérer les messages
  */
 function getmessages_of_messagerie($id_messagerie) {
-    if(empty($id_messagerie)) {
-        return [];
-    }
+    $list_cpt_message=get_cpt_message();
 
-    
-    $messages = get_posts(
+    $messages=[];
+
+    if( !empty($id_messagerie) ) {
+        $messages = get_posts(
                         array(
-                            'post_type' => array('ecp_message','ecp_fmessage'),
+                            'post_type' => $list_cpt_message,
                             'post_parent' => $id_messagerie,
                             'posts_per_page'   => -1,
                             'orderby'          => 'date',
                             'order'            => 'DESC',
                         )
                     );
+    }
         
     return $messages;
 
@@ -419,15 +468,16 @@ function getmessages_of_messagerie($id_messagerie) {
  * @return array            la liste des commentaires
  */
 function getcomments_of_message( $id_message ) {
-    if(empty($id_message)) {
-        return [];
-    }
+    $list_cpt_message=get_cpt_message();
 
-    $comments=get_comments(
+    $comments=[];
+
+    if( !empty($id_message) ) {
+        $comments=get_comments(
                     array(  'post_id' => $id_message,
-                            'post_type' => array( 'ecp_message','ecp_fmessage' )
+                            'post_type' => $list_cpt_message
                     ));
-
+    }
     return $comments;
 }
 /**
@@ -483,14 +533,15 @@ function getcomments_of_message( $id_message ) {
  * @param int $id_calendar   id du calendrier dont il faut récupérer les événements
  */
 function getevents_of_calendar($id_calendar) {
-    if(empty($id_calendar)) {
-        return [];
-    }
+    $list_cpt_event=get_cpt_event();
 
-    //récupération des événements
-    $events = get_posts(
+    $events=[];
+    
+    if( !empty($id_calendar) ) {
+        //récupération des événements
+        $events = get_posts(
                     array(
-                        'post_type' => array('ecp_event','ecp_fevent'),
+                        'post_type' => $list_cpt_event,
                         'post_parent' => $id_calendar,
                         'posts_per_page'   => -1,
                         'orderby' => 'meta_value_num',
@@ -498,7 +549,7 @@ function getevents_of_calendar($id_calendar) {
                         'order' => 'DESC'
                         )
                     );
-          
+    }
     return $events;
 }
 
@@ -510,14 +561,15 @@ function getevents_of_calendar($id_calendar) {
  * 
  */
 function getevents_of_list_calendar($list_id_calendar, $nb_event=3) {
-    if(empty( $list_id_calendar )) {
-        return [];
-    }
+    $list_cpt_event=get_cpt_event();
 
-    //récupération des événements
-    $events = get_posts(
+    $events=[];
+
+    if( !empty( $list_id_calendar ) ) {
+        //récupération des événements
+        $events = get_posts(
                     array(
-                        'post_type' => array('ecp_event','ecp_fevent'),
+                        'post_type' => $list_cpt_event,
                         'post_parent__in' => $list_id_calendar,
                         'posts_per_page'   => $nb_event,
                         'orderby' => 'meta_value_num',
@@ -525,7 +577,7 @@ function getevents_of_list_calendar($list_id_calendar, $nb_event=3) {
                         'order' => 'DESC'
                         )
                     );
-          
+    }
     return $events;
 }
 
@@ -537,19 +589,21 @@ function getevents_of_list_calendar($list_id_calendar, $nb_event=3) {
  * @param int $id_ged    id de la ged dont il faut récupérer les documents
  */
 function getdocuments_of_ged($id_ged) {
-    if( empty($id_ged) ) {
-        return [];
-    }
+    $list_cpt_document=get_cpt_document();
 
-    $documents = get_posts(
+    $documents=[];
+
+    if( !empty($id_ged) ) {
+        $documents = get_posts(
                     array(
-                        'post_type' => array('ecp_document','ecp_fdocument'),
+                        'post_type' => $list_cpt_document,
                         'post_parent' => $id_ged,
                         'posts_per_page'   => -1,
                         'orderby'          => 'date',
                         'order'            => 'DESC',
                     )
                 );
+    }
     return $documents;
 }
 
@@ -606,22 +660,30 @@ function display_extranet_menu($id_instance, $active_page) {
  */
 function get_link_composant_of_instance($id_instance, $type) {
     $permalink=false;
+    $id_user=get_current_user_id();
     if($type=='calendrier') {
         $calendar_id=get_post_meta($id_instance, '_meta_calendar_commission',true);
         if(!empty($calendar_id)){
             $permalink=get_permalink($calendar_id);
         }
     } elseif($type=='messagerie') {
-        //@TODO ajout du filtre selon type de public pour afficher la bonne messagerie
-        $messagerie_id=get_post_meta($id_instance, '_meta_messagerie_commission',true);
-        if(!empty($messagerie_id)) {
-            $permalink=get_permalink($messagerie_id);
+        $list_messagerie_id=get_post_meta($id_instance, '_meta_messagerie_commission',false);
+        if(!empty($list_messagerie_id)) {
+            foreach($list_messagerie_id as $id_messagerie) {
+                if( check_user_type_can_access_cpt( $id_messagerie, $id_user) ) {
+                        $permalink=get_permalink($id_messagerie);
+                }
+            }
+            
         }
     } elseif($type=='ged') {
-        //@TODO ajout du filtre selon type de public pour afficher la bonne ged
-        $ged_id=get_post_meta($id_instance, '_meta_ged_commission',true);
-        if(!empty($ged_id)) {
-            $permalink=get_permalink($ged_id);
+        $list_ged_id=get_post_meta($id_instance, '_meta_ged_commission',false);
+        if(!empty($list_ged_id)) {
+            foreach($list_ged_id as $id_ged) {
+                if( check_user_type_can_access_cpt( $id_ged, $id_user ) ) {
+                        $permalink=get_permalink($id_ged);
+                }
+            }
         }
     }
 
@@ -748,7 +810,7 @@ function display_view_list_events($list_events) {
 /**
  * Fonction pour générer la vue qui affiche les documents
  *
- * @param   array     $list_message liste de messages à afficher
+ * @param   array     $list_documents liste de messages à afficher
  */
 function display_view_documents($list_documents) {
 
@@ -797,7 +859,7 @@ function display_view_documents($list_documents) {
 /**
  * Fonction qui affiche le contenu de la popup permettant de confirmer sa présence à un événement
  *
- * @param int $id_event     id de l'événement pour lequel on affiche une popup
+ * @param object $event     événement pour lequel on affiche une popup
  */
 function display_popup_presence_content($event) {
     ?>
@@ -886,15 +948,18 @@ function extranetecp_change_mail_type() {
 * Funtion to get email content of the message notification
 */
 function get_message_notification_content($composant_id) {
+    $list_cpt_document=get_cpt_document();
+    $list_cpt_event=get_cpt_event();
+    $list_cpt_message=get_cpt_message();
 
     $post=get_post($composant_id);
 
     ob_start();
-    if( 'ecp_message' == get_post_type( $post->ID ) || 'ecp_fmessage' == get_post_type( $post->ID )) {
+    if( in_array( get_post_type( $post->ID ), $list_cpt_message ) ) {
         require_once get_template_directory() . '/mails/notification-message.php';
-    } elseif ( 'ecp_event' == get_post_type( $post->ID ) || 'ecp_fevent' == get_post_type( $post->ID ) ) {
+    } elseif ( in_array( get_post_type( $post->ID ), $list_cpt_event ) ) {
         require_once get_template_directory() . '/mails/notification-event.php';
-    } elseif ( 'ecp_document' == get_post_type( $post->ID ) || 'ecp_fdocument' == get_post_type( $post->ID )) {
+    } elseif ( in_array( get_post_type( $post->ID ), $list_cpt_document ) ) {
         require_once get_template_directory() . '/mails/notification-document.php';
     }
     $email = ob_get_contents();
@@ -947,17 +1012,20 @@ function send_email_confirmation_presence_event($email_dest,$message,$event, $us
  * @return array        tableau contenant le sobjets instances
  */
 function get_instances_of_user( $id_user ) {
-    if(empty($id_user)) {
-        return [];
-    }
-    $instances = get_posts(
+    $list_cpt_instances = get_cpt_instances();
+
+    $instances=[];
+
+    if( !empty($id_user) ) {
+        $instances = get_posts(
                     array(
-                        'post_type' => array('commission','fcommission'),
+                        'post_type' => $list_cpt_instances,
                         'meta_key' => '_meta_members_commission',
                         'meta_value' => $id_user,
                         'posts_per_page'   => -1
                     )
                 );
+    }
 
     return $instances;
 }
