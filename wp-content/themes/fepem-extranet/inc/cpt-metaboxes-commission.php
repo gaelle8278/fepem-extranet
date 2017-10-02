@@ -520,7 +520,7 @@ function commission_custom_columns( $column, $post_id ) {
                             $terms_messagerie[]=$term->name;
                         }
                     }
-                    $messagerie_html[]=get_the_title($id_messagerie).(!empty($terms_messagerie)?"-".implode(", ",$terms_messagerie):"");
+                    $messagerie_html[]=get_the_title($id_messagerie).(!empty($terms_messagerie)?" (".implode(", ",$terms_messagerie).")":"");
                 }
                 echo implode(",<br/>",$messagerie_html);
             } else {
@@ -540,9 +540,9 @@ function commission_custom_columns( $column, $post_id ) {
                             $terms_ged[]=$term->name;
                         }
                     }
-                    $ged_html[]=get_the_title($id_ged).(!empty($terms_ged)?"-".implode(", ",$terms_ged):"");
+                    $ged_html[]=get_the_title($id_ged).(!empty($terms_ged)?" (".implode(", ",$terms_ged).")":"");
                 }
-                echo implode(", ",$ged_html);
+                echo implode(",<br/>",$ged_html);
             } else {
                 echo "Aucune GED rattachée";
             }

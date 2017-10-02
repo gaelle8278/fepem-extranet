@@ -102,8 +102,11 @@ function check_user_type_can_access_cpt($id_cpt, $id_user=0) {
     } else {
         $terms_of_cpt=get_the_terms($id_cpt, 'ecp_tax_type_participant');
     }
-    foreach( $terms_of_cpt as $term ) {
-        $slug_types_of_cpt[]=$term->slug;
+    // si le cpt n'a pas de type de participant c'est que personne n'est autorisé à le voir
+    if( ! empty($terms_of_cpt) ) {
+        foreach( $terms_of_cpt as $term ) {
+            $slug_types_of_cpt[]=$term->slug;
+        }
     }
 
     //check if user taxonomy is included in cpt taxonomy

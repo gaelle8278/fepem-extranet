@@ -240,8 +240,8 @@ function build_metabox_event_data( $post ) {
         <ul>
             <li><label>Lieu</label><input name="ecp_event_place" value="<?php echo $meta_place; ?>" /></li>
             <li><label>Date de début</label><input name="ecp_event_startdate" class="ecpdate" value="<?php echo $clean_sd; ?>" readonly='true' /></li>
-            <li><label>Date de fin</label><input name="ecp_event_starttime" value="<?php echo $clean_st; ?>" /><em>24h format (ex 19h00)</em></li>
-            <li><label>Heure de début</label><input name="ecp_event_enddate" class="ecpdate" value="<?php echo $clean_ed; ?>" readonly='true' /></li>
+            <li><label>Heure de début</label><input name="ecp_event_starttime" value="<?php echo $clean_st; ?>" /><em>24h format (ex 19h00)</em></li>
+            <li><label>Date de fin</label><input name="ecp_event_enddate" class="ecpdate" value="<?php echo $clean_ed; ?>" readonly='true' /></li>
             <li><label>Heure de fin</label><input name="ecp_event_endtime" value="<?php echo $clean_et; ?>" /><em>24h format (ex 19h00)</em></li>
         </ul>
     </div>

@@ -11,7 +11,7 @@ $list_cpt=get_cpt();
 if( is_singular( $list_cpt ) ) {
     //fetch displayed CPT
     $post= get_queried_object();
-    //connected user
+    //fetch connected user
     $id_user= get_current_user_id();
     //fetch cpt to test
     $list_cpt_instances= get_cpt_instances();
