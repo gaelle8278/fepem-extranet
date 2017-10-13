@@ -36,6 +36,7 @@ function get_months_nb() {
 }
 
 //CPT used in application
+////////////////////////////////
 function get_cpt_instances() {
     $list_cpt_instances=['commission', 'fcommission','oscommission','cpcommission'];
 
@@ -104,7 +105,7 @@ function get_cpt() {
 function get_cpt_tax_type_public() {
     $list_cpt_instances=get_cpt_instances();
     $list_cpt_messagerie=get_cpt_messagerie();
-    $list_cpt_ged=get_cpt_ged();;
+    $list_cpt_ged=get_cpt_ged();
 
     $list_cpt_tax_type_public=array_merge($list_cpt_instances,$list_cpt_messagerie,$list_cpt_ged);
 
@@ -121,7 +122,7 @@ function get_cpt_notifications() {
     return $list_cpt_notifications;
 }
 
-//array usefull to build admin menu
+//usefull to build admin menu
 /////////////////////////////////////////
 function get_cpt_calendriers_menu() {
     $list_cpt_calendriers_menu=[
@@ -155,7 +156,7 @@ function get_cpt_geds_menu() {
     return $list_cpt_geds_menu;
 }
 
-//array usefull to build metaboxes
+//usefull to build cpt metaboxes
 //////////////////////////////////////:
 function get_cpt_calendrier_of_instance() {
     $list_cpt_calendrier_of_instance = [
@@ -248,17 +249,6 @@ function get_types_for_admin_comment_filter() {
     return $post_types_for_admin_comment_filter;
 }
 
-function get_message_type_by_role() {
-    $message_type_by_role = [
-        'admin-fepem-exec' => 'ecp_message',
-        'admin-fepem' => 'ecp_fmessage',
-        'admin-os' => 'ecp_osmessage',
-        'admin-cp' => 'ecp_cpmessage'
-    ];
-    
-    return $message_type_by_role;
-}
-
 /**
  * Helper function get getting roles that the user is allowed to create/edit.
  *
@@ -303,4 +293,97 @@ function extranetcp_get_allowed_delete_roles( $user ) {
     }
 
     return $allowed;
+}
+
+//usefull to get cpt by role
+//////////////////////////////////
+function get_message_type_by_role() {
+    $message_type_by_role = [
+        'admin-fepem-exec' => 'ecp_message',
+        'admin-fepem' => 'ecp_fmessage',
+        'admin-os' => 'ecp_osmessage',
+        'admin-cp' => 'ecp_cpmessage'
+    ];
+
+    return $message_type_by_role;
+}
+
+
+function get_commission_type_by_role() {
+    $commission_type_by_role = [
+        'admin-fepem-exec' => 'commission',
+        'admin-fepem' => 'fcommission',
+        'admin-os' => 'oscommission',
+        'admin-cp' => 'cpcommission'
+    ];
+
+    return $commission_type_by_role;
+}
+
+//usefull to get names by cpt or by taxo
+/////////////////////////////////////////
+function get_display_name_taxo_type() {
+    $taxo_type_name = [
+        "cp" => "CP",
+        "os" => "OS",
+        "fepem" => "Fepem",
+        "fepem-executif" => "Fepem exécutif"
+    ];
+
+    return $taxo_type_name;
+}
+
+function get_links_name_by_cpt_taxo_type() {
+    $links_name_by_cpt_taxo_type= [
+        'ecp_messagerie-cp' => 'Messages CP',
+        'ecp_fmessagerie-cp' => 'Messages CP',
+        'ecp_osmessagerie-cp' => 'Messages CP',
+        'ecp_cpmessagerie-cp' => 'Messages CP',
+        'ecp_messagerie-os' => 'Messages OS',
+        'ecp_fmessagerie-os' => 'Messages OS',
+        'ecp_osmessagerie-os' => 'Messages OS',
+        'ecp_cpmessagerie-os' => 'Messages OS',
+        'ecp_messagerie-fepem' => 'Messages Fepem',
+        'ecp_fmessagerie-fepem' => 'Messages Fepem',
+        'ecp_osmessagerie-fepem' => 'Messages Fepem',
+        'ecp_cpmessagerie-fepem' => 'Messages Fepem',
+        'ecp_messagerie-fepem-executif' => 'Messages Fepem exécutif',
+        'ecp_fmessagerie-fepem-executif' => 'Messages Fepem exécutif',
+        'ecp_osmessagerie-fepem-executif' => 'Messages Fepem exécutif',
+        'ecp_cpmessagerie-fepem-executif' => 'Messages Fepem exécutif',
+        'ecp_ged-cp' => 'Documents CP',
+        'ecp_fged-cp' => 'Documents CP',
+        'ecp_osged-cp' => 'Documents CP',
+        'ecp_cpged-cp' => 'Documents CP',
+        'ecp_ged-os' => 'Documents OS',
+        'ecp_fged-os' => 'Documents OS',
+        'ecp_osged-os' => 'Documents OS',
+        'ecp_cpged-os' => 'Documents OS',
+        'ecp_ged-fepem' => 'Documents Fepem',
+        'ecp_fged-fepem' => 'Documents Fepem',
+        'ecp_osged-fepem' => 'Documents Fepem',
+        'ecp_cpged-fepem' => 'Documents Fepem',
+        'ecp_ged-fepem-executif' => 'Documents Fepem exécutif',
+        'ecp_fged-fepem-executif' => 'Documents Fepem exécutif',
+        'ecp_osged-fepem-executif' => 'Documents Fepem exécutif',
+        'ecp_cpged-fepem-executif' => 'Documents Fepem exécutif'
+
+    ];
+
+    return $links_name_by_cpt_taxo_type;
+}
+
+function get_links_name_by_cpt() {
+    $links_name_by_cpt_taxo_type= [
+        'ecp_messagerie' => 'Messages',
+        'ecp_fmessagerie' => 'Messages',
+        'ecp_osmessagerie' => 'Messages',
+        'ecp_cpmessagerie' => 'Messages',
+        'ecp_ged' => 'Documents',
+        'ecp_fged' => 'Documents',
+        'ecp_osged' => 'Documents',
+        'ecp_cpged' => 'Documents'
+    ];
+
+    return $links_name_by_cpt_taxo_type;
 }

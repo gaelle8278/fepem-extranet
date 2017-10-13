@@ -7,7 +7,7 @@ function get_member_connected() {
 
     if ( is_user_logged_in() ) {
         $user = wp_get_current_user();
-        if ( in_array( 'member-extranet', (array) $user->roles ) ) {
+        if ( in_array( 'member-extranet', (array) $user->roles ) ||  user_can($user, 'manage_instances')) {
             $member = $user;
         }
     }
@@ -33,8 +33,7 @@ function get_current_user_roles() {
 function redirect_user_if_no_access_extranet() {
     if ( is_user_logged_in() ) {
         $user = wp_get_current_user();
-        //@TODO ajouter accès aux administrateurs et administrateurs d'instance
-        if ( ! in_array( 'member-extranet', (array) $user->roles ) ) {
+        if ( ! in_array( 'member-extranet', (array) $user->roles ) && ! user_can($user, 'manage_instances') ) {
             wp_redirect(admin_url());
             exit;
         }
@@ -58,27 +57,79 @@ function check_user_access_instance($id_commission, $id_user=0) {
         return $access;
     }
 
-    $list_members = get_post_meta($id_commission,"_meta_members_commission", false);
+    $user = get_userdata($id_user);
 
-
-    if(in_array($id_user, $list_members)) {
-        $access=true;
+    if ( user_can($user, 'manage_instances') ) {
+        $access = check_admin_instance_access_instance($user, $id_commission);
+    } else {
+        $access = check_member_instance_access_instance($user, $id_commission);
     }
 
     return $access;
 }
 /**
- * Fonction pour vérifier si l'utilisateur peut accéder au CPT
+ * Fonction pour vérifier si membre fait partie de la commission
+ *
+ * @param WP_user $user             user to check
+ * @param int $id_commission        identifier of commission
+ * @return boolean                  status of access
+ */
+function check_member_instance_access_instance($user, $id_commission) {
+    $access=false;
+
+    if( empty($user) || empty($id_commission) ) {
+        return $access;
+    }
+
+    //liste des membres de la commission
+    $list_members = get_post_meta($id_commission,"_meta_members_commission", false);
+
+    //si l'utilisateur est dans le liste des membres de la commission => ok
+    if(in_array($user->ID, $list_members)) {
+        $access=true;
+    }
+
+    return $access;
+}
+function check_admin_instance_access_instance($user, $id_commission) {
+    $access=false;
+
+    if( empty($user) || empty($id_commission) ) {
+        return $access;
+    }
+
+    //type cpt de la commission
+    $instance_type = get_post_type($id_commission);
+    //role de l'utilisateur
+    $user_roles=$user->roles;
+    //type d'instance par role
+    $list_cpt_instances_by_role = get_commission_type_by_role();
+
+    //si une cot instance est définie pour le role de l'utilisateur
+    if(array_key_exists( $user_roles[0], $list_cpt_instances_by_role) ) {
+        //on récupère le cpt instance lié au role de l'utilisateur
+        $list_cpt_instances_for_user = $list_cpt_instances_by_role[$user_roles[0]];
+        //si le type cpt de la commission requétée est égal au cpt instance autorisé pour le role de l'utilisateur => ok
+        if($instance_type == $list_cpt_instances_for_user) {
+            $access=true;
+        }
+
+    }
+
+    return $access;
+}
+
+/**
+ * Fonction pour vérifier si l'utilisateur peut accéder au CPT selon son tye
  * le type de membre de l'utilisateur doit correspondre au type de participant du CPT
+ *
+ * La vérification est faites pour les cpt liés à la messagerie et aux documents
  *
  * @param   int $id_cpt     id of cpt
  * @param   int $id_user    id of user
  * @return  boolean         can view or not
  */
 function check_user_type_can_access_cpt($id_cpt, $id_user=0) {
-    
-    $list_cpt_document=get_cpt_document();
-    $list_cpt_message=get_cpt_message();
 
     $access=false;
 
@@ -86,34 +137,47 @@ function check_user_type_can_access_cpt($id_cpt, $id_user=0) {
         return $access;
     }
 
-    //get user taxonomy "Type de membre"
-    $slug_type_of_user="";
-    $terms_of_user=wp_get_object_terms($id_user, 'ecp_tax_type_membre');
-    if( !empty( $terms_of_user ) ) {
-        $type_of_user=$terms_of_user[0];
-        $slug_type_of_user=$type_of_user->slug;
-    }
+    $user = get_userdata($id_user);
 
-    //get cpt taxonomy "Type de participant"
-    $slug_types_of_cpt=[];
-    $post_type=get_post_type($id_cpt);
-    if( in_array( $post_type,$list_cpt_message ) || in_array( $post_type,$list_cpt_document ) ) {
-        $terms_of_cpt=get_the_terms(wp_get_post_parent_id($id_cpt),'ecp_tax_type_participant');
+    if ( user_can($user, 'manage_instances') ) {
+        //admin instance can access to composant whatever its type
+        $access=true;
     } else {
-        $terms_of_cpt=get_the_terms($id_cpt, 'ecp_tax_type_participant');
-    }
-    // si le cpt n'a pas de type de participant c'est que personne n'est autorisé à le voir
-    if( ! empty($terms_of_cpt) ) {
-        foreach( $terms_of_cpt as $term ) {
-            $slug_types_of_cpt[]=$term->slug;
+        //check if user type correspond to cpt type
+        $list_cpt_document=get_cpt_document();
+        $list_cpt_message=get_cpt_message();
+
+        //get user taxonomy "Type de membre"
+        $slug_type_of_user="";
+        $terms_of_user=wp_get_object_terms($id_user, 'ecp_tax_type_membre');
+        if( !empty( $terms_of_user ) ) {
+            $type_of_user=$terms_of_user[0];
+            $slug_type_of_user=$type_of_user->slug;
+        }
+
+        //get cpt taxonomy "Type de participant"
+        $slug_types_of_cpt=[];
+        $post_type=get_post_type($id_cpt);
+        if( in_array( $post_type,$list_cpt_message ) || in_array( $post_type,$list_cpt_document ) ) {
+            //message et document
+            $terms_of_cpt=get_the_terms(wp_get_post_parent_id($id_cpt),'ecp_tax_type_participant');
+        } else {
+            //messagerie et GED
+            $terms_of_cpt=get_the_terms($id_cpt, 'ecp_tax_type_participant');
+        }
+        // si le cpt n'a pas de type de participant c'est que personne n'est autorisé à le voir
+        if( ! empty($terms_of_cpt) ) {
+            foreach( $terms_of_cpt as $term ) {
+                $slug_types_of_cpt[]=$term->slug;
+            }
+        }
+
+        //check if user taxonomy is included in cpt taxonomy
+        if(in_array($slug_type_of_user, $slug_types_of_cpt) ) {
+            $access=true;
         }
     }
-
-    //check if user taxonomy is included in cpt taxonomy
-    if(in_array($slug_type_of_user, $slug_types_of_cpt) ) {
-        $access=true;
-    }
-
+    
     return $access;
 
 }
@@ -625,34 +689,45 @@ function display_extranet_menu($id_instance, $active_page) {
             </li>
             <?php
             $link_messagerie=get_link_composant_of_instance($id_instance, 'messagerie');
-            if($link_messagerie !== false) {
-                ?>
-                <li <?php echo $active_page=="messages"?"class='item-active'":""; ?>>
-                    <a href="<?php echo  $link_messagerie; ?>">Messages</a>
-                </li>
-                <?php
+            if(!empty($link_messagerie)) {
+                $nb_links=count($link_messagerie);
+                foreach($link_messagerie as $link) {
+                    $title=get_link_composant_title($nb_links,$link['id_composant']);
+                    ?>
+                    <li <?php echo $active_page=="messages" ?"class='item-active'":""; ?>>
+                        <a href="<?php echo  $link['permalink']; ?>"><?php echo $title; ?></a>
+                    </li>
+                    <?php
+                }
             }
             $link_calendar=get_link_composant_of_instance($id_instance, 'calendrier');
-            if($link_calendar !== false) {
-                ?>
-                <li <?php echo $active_page=="calendrier"?"class='item-active'":""; ?>>
-                    <a href="<?php echo $link_calendar; ?>">Calendrier</a>
-                </li>
-                <?php
+            if(!empty($link_calendar)) {
+                foreach($link_calendar as $link) {
+                    ?>
+                    <li <?php echo $active_page=="calendrier"?"class='item-active'":""; ?>>
+                        <a href="<?php echo $link['permalink']; ?>">Calendrier</a>
+                    </li>
+                    <?php
+                }
             }
             $link_ged=get_link_composant_of_instance($id_instance, 'ged');
-            if($link_ged !== false) {
-                ?>
-                <li <?php echo $active_page=="ged"?"class='item-active'":""; ?>>
-                    <a href="<?php echo $link_ged; ?>">Documents</a>
-                </li>
-            <?php
+            if(!empty($link_ged)) {
+                $nb_links=count($link_ged);
+                foreach($link_ged as $link) {
+                    $title=get_link_composant_title($nb_links,$link['id_composant']);
+                    ?>
+                    <li <?php echo $active_page=="ged"?"class='item-active'":""; ?>>
+                        <a href="<?php echo $link['permalink']; ?>"><?php echo $title; ?></a>
+                    </li>
+                    <?php
+                }
             }
             ?>
         </ul>
     </div>
     <?php
 }
+
 
 /**
  * Fonction qui retourne le lien d'un objet composant les instances
@@ -662,19 +737,25 @@ function display_extranet_menu($id_instance, $active_page) {
  * @return type
  */
 function get_link_composant_of_instance($id_instance, $type) {
-    $permalink=false;
+    $permalink=[];
     $id_user=get_current_user_id();
     if($type=='calendrier') {
         $calendar_id=get_post_meta($id_instance, '_meta_calendar_commission',true);
         if(!empty($calendar_id)){
-            $permalink=get_permalink($calendar_id);
+            $link_infos=[];
+            $link_infos['id_composant']=$calendar_id;
+            $link_infos['permalink']=get_permalink($calendar_id);
+            $permalink[]=$link_infos;
         }
     } elseif($type=='messagerie') {
         $list_messagerie_id=get_post_meta($id_instance, '_meta_messagerie_commission',false);
         if(!empty($list_messagerie_id)) {
             foreach($list_messagerie_id as $id_messagerie) {
                 if( check_user_type_can_access_cpt( $id_messagerie, $id_user) ) {
-                        $permalink=get_permalink($id_messagerie);
+                    $link_infos=[];
+                    $link_infos['id_composant']=$id_messagerie;
+                    $link_infos['permalink']=get_permalink($id_messagerie);
+                    $permalink[]=$link_infos;
                 }
             }
             
@@ -684,13 +765,48 @@ function get_link_composant_of_instance($id_instance, $type) {
         if(!empty($list_ged_id)) {
             foreach($list_ged_id as $id_ged) {
                 if( check_user_type_can_access_cpt( $id_ged, $id_user ) ) {
-                        $permalink=get_permalink($id_ged);
+                    $link_infos=[];
+                    $link_infos['id_composant']=$id_ged;
+                    $link_infos['permalink']=get_permalink($id_ged);
+                    $permalink[]=$link_infos;
                 }
             }
         }
     }
 
     return $permalink;
+}
+
+/**
+ * Fonction qui détermine le titre du lien en fonction du nombre de liens d'un même type de CPT à afficher :
+ * plusieurs messageries, plusieurs GED
+ */
+function get_link_composant_title($nb_links, $id_composant) {
+    $title="";
+
+    //si le CPT peut etre destiné à un public précis
+    if( in_array(get_post_type($id_composant), get_cpt_tax_type_public()) ) {
+        //si plusieurs liens du meme type de CPT doivent etre affiché
+        if($nb_links > 1 ) {
+            //= titre comprenant la taxo type du CPT
+            
+            //nom des liens par cpt et taxo
+            $links_name_by_cpt_taxo_type=get_links_name_by_cpt_taxo_type();
+            //taxo du cpt concerné
+            $terms_of_cpt=get_the_terms($id_composant, 'ecp_tax_type_participant');
+            $title= $links_name_by_cpt_taxo_type[get_post_type($id_composant)."-".$terms_of_cpt[0]->slug];
+
+
+        } else {
+            //= titre simple du cpt
+
+            //nom des liens par cpt
+            $links_name_by_cpt=get_links_name_by_cpt();
+            $title= $links_name_by_cpt[get_post_type($id_composant)];
+        }
+    }
+
+    return $title;
 }
 
 /**
@@ -1015,20 +1131,81 @@ function send_email_confirmation_presence_event($email_dest,$message,$event, $us
  * @return array        tableau contenant le sobjets instances
  */
 function get_instances_of_user( $id_user ) {
+    $instances=[];
+    
+    $user = get_userdata($id_user);
+        
+    if ( user_can($user, 'manage_instances') ) {
+        $instances = get_instances_of_admin_instance($user);
+    } else {
+        $instances = get_instances_of_member($user);
+    }
+
+
+    return $instances;
+}
+
+/**
+ * Fonction pour retrouver les instances auxquelles appartienennt l'utilisateur
+ *
+ * @param   WP_object  $user    user of interest
+ * @return  array               list of instances
+ */
+function get_instances_of_member($user) {
+    //get list of cpt type to request
     $list_cpt_instances = get_cpt_instances();
 
     $instances=[];
 
-    if( !empty($id_user) ) {
+    if( !empty($user) ) {
         $instances = get_posts(
                     array(
                         'post_type' => $list_cpt_instances,
                         'meta_key' => '_meta_members_commission',
-                        'meta_value' => $id_user,
+                        'meta_value' => $user->ID,
                         'posts_per_page'   => -1
                     )
                 );
     }
 
     return $instances;
+}
+/**
+ * Fonction pour retrouver les instances d'un admministrateurs d'instances
+ *
+ * @param   WP_object  $user    user of interest
+ * @return  array               list of instances
+ */
+function get_instances_of_admin_instance($user) {
+    //get list of cpt type to request
+    $list_cpt_instances_by_role = get_commission_type_by_role();
+    $user_roles=$user->roles;
+
+    if(array_key_exists( $user_roles[0], $list_cpt_instances_by_role) ) {
+        $list_cpt_instances = $list_cpt_instances_by_role[$user_roles[0]];
+    }
+
+    $instances=[];
+
+    if( !empty($list_cpt_instances) ) {
+        $instances = get_posts(
+                    array(
+                        'post_type' => $list_cpt_instances,
+                        'posts_per_page'   => -1
+                    )
+                );
+    }
+
+    return $instances;
+}
+
+/**
+* Function to get current url
+*
+*/
+function get_current_url() {
+  global $wp;
+  $current_url = home_url(add_query_arg(array(),$wp->request).'/');
+
+  return $current_url;
 }

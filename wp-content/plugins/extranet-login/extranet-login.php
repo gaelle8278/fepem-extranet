@@ -35,6 +35,8 @@ class Extranet_Login_Plugin {
         add_action( 'wp_logout', array( $this, 'redirect_after_logout' ) );
         //redirection après connexion réussie
         add_filter( 'login_redirect', array( $this, 'redirect_after_login' ), 10, 3 );
+        //redirections notamment si accès page connexion et connecté
+        add_action( 'template_redirect', array( $this,'extranetcp_template_redirect') );
         //redirection vers la page de demande de récupération de mot de passe perso
         add_action( 'login_form_lostpassword', array( $this, 'redirect_to_custom_lostpassword' ) );
         // traitement du formulaire de demande de récupération de mot de passe
@@ -62,8 +64,8 @@ class Extranet_Login_Plugin {
         $page_definitions = array(
             'connexion' => array(
                 'title' => "Connexion",
-                'content' => "<h1>Se connecter à l'Epace FEPEM</h1>"
-                            . "Pour vous connecter à votre espace FEPEM, nous vous remercions de renseigner vos identifiants"
+                'content' => "<h1>Se connecter à l'Extranet</h1>"
+                            . "Pour vous connecter à votre espace Extranet, nous vous remercions de renseigner vos identifiants"
                             . "<br /> "
                             . "[extranet-login-form]"
             ),
@@ -234,6 +236,17 @@ class Extranet_Login_Plugin {
     }
 
     /**
+     * Hook to redirect before page load
+     */
+    function extranetcp_template_redirect() {
+        if( is_page( 'connexion' ) && is_user_logged_in() ) {
+            $redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : null;
+            $this->redirect_logged_in_user( $redirect_to );
+            exit;
+        }
+    }
+
+    /**
     * Hook to returns the URL to which the user should be redirected after the (successful) login.
     *
     * @param string           $redirect_to           The redirect destination URL.
@@ -249,8 +262,8 @@ class Extranet_Login_Plugin {
             return $redirect_url;
         }
         
-        if( in_array( 'member-extranet', $user->roles ) ) {
-            // les membres de l'Extranet sont redirigés vers la page d'accueil
+        if( in_array( 'member-extranet', $user->roles ) || user_can($user, 'manage_instances') ) {
+            // les membres de l'Extranet et les administrateurs d'instances sont redirigés vers la page d'accueil
             $redirect_url = home_url();
         } else {
             //si administrateur et si le paramètre requested_redirect_to est défini, requested_redirect_to est utilisé
@@ -575,7 +588,7 @@ class Extranet_Login_Plugin {
     private function redirect_logged_in_user( $redirect_to = null ) {
         
         $user = wp_get_current_user();
-        if( in_array( 'member-extranet', $user->roles ) ) {
+        if( in_array( 'member-extranet', $user->roles ) || user_can($user, 'manage_instances') ) {
             //si c'est un membre de l'Extranet => redirection vers la page d'accueil
             wp_redirect( home_url() );
         } else {
